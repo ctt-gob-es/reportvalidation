@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<body>
+	<div class="container catmin-login-form">
+
+		<form th:action="@{/login}" method="POST" class="form-signin">
+			<h3 class="form-signin-heading" th:text="#{page.login.title}"></h3>
+			<div class="alert alert-danger alert-dismissible fade show"
+				role="alert" th:if="${param.error}">
+				<span th:text="#{login.error}"></span>
+			</div>
+			<br /> <input type="text" id="login" name="login"
+				th:placeholder="Usuario" class="form-control" /> <br /> <input
+				type="password" th:placeholder="Contraseña" id="password"
+				name="password" class="form-control" /> <br />
+			<button class="btn btn-lg btn-primary btn-block" name="Submit"
+				value="Login" type="Submit" th:text="#{login.button}"></button>
+		</form>
+	</div>
+</body>
+</html>

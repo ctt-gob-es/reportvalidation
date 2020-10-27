@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="footer">
+	<footer class="navbar  navbar-dark  mt-4" id="piePagina">
+		<div class="col-md-3 text-left">
+			<a href="https://www.fundacionctic.org/es/home"> <img src="/images/logo-ctic-pie-web.png" height="50px" alt="" /></a>
+		</div>
+		<div class="col-md-6 text-center">
+			<div class="container-fluid justify-content-center">
+				<div>
+					<div class="navbar-text text-center">
+						&#169; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span>&nbsp;<span th:text="#{footer}"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3 text-right">
+			<a href="http://www.fundacionbarredo.es/"> <img src="/images/logo-barredo-web.png" height="50px" alt=""></a>
+		</div>
+	</footer>
+</div>

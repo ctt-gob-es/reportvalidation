@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<div th:fragment="navbar">
+	<nav class="navbar navbar-expand-lg navbar-light bg-white ">
+		<a class="navbar-brand" th:href="@{/}">
+			<img src="/images/logo-catastro-web.png" height="50" alt="">
+		</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse " id="navbarSupportedContent">
+			<ul class="navbar-nav  ">
+
+				<li class="font-weight-bold nav-item mr-1 ml-2">
+					<a class="nav-link" th:href="@{/derechos-mineros}" th:text="#{navbar.link.concessions}"></a>
+				</li>
+				<li class="font-weight-bold nav-item mr-1 ml-2">
+					<a class="nav-link" th:href="@{/derechos-mineros/extractivas}" th:text="#{navbar.link.extractivas}"></a>
+				</li>
+				<li class="font-weight-bold nav-item mr-1 ml-2">
+					<a class="nav-link" th:href="@{/concentraciones}" th:text="#{navbar.link.concentraciones}"></a>
+				</li>
+<!-- 				<li class="font-weight-bold nav-item mr-1"> -->
+<!-- 					<a class="nav-link" th:href="@{/informes}" th:text="#{navbar.link.informes}"></a> -->
+<!-- 				</li> -->
+
+
+				<li class="font-weight-bold nav-item dropdown mr-1 ml-2">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{navbar.link.expedientes}"></a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.tramitacion}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.tramitacion')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.tramitacion')}"></span>
+							</button>
+						</div>
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.documentacion}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.documentacion')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.documentacion')}"></span>
+							</button>
+						</div>
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.concurso}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.concurso')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.concurso')}"></span>
+							</button>
+						</div>
+
+
+						<div class="dropdown-divider"></div>
+
+						<h6 class="dropdown-header" th:text="#{navbar.link.expedientes.vigencia}"></h6>
+
+						<!-- 						<div class="dropdown-item"> -->
+						<!-- 							<span class="col" th:text="#{alarms.pi.concentracion}"></span> -->
+						<!-- 							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.concentracion')" class="col-1 btn btn-default btn-circle btn-alarm"> -->
+						<!-- 								<span th:text="${#httpSession.getAttribute('alarms.pi.concentracion')}"></span> -->
+						<!-- 							</button> -->
+						<!-- 						</div> -->
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.explotacion}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.vigencia.explotacion')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.vigencia.explotacion')}"></span>
+							</button>
+						</div>
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.investigacion}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.vigencia.investigacion')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.vigencia.investigacion')}"></span>
+							</button>
+						</div>
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.seccionA}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.vigencia.seccionA')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.vigencia.seccionA')}"></span>
+							</button>
+						</div>
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.pi.seccionB}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarms('alarms.pi.vigencia.seccionB')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.pi.vigencia.seccionB')}"></span>
+							</button>
+						</div>
+
+						<div class="dropdown-divider"></div>
+
+
+						<div class="dropdown-item">
+							<span class="col" th:text="#{alarms.concentracion}"></span>
+							<button type="button" th:title="#{alarms.ver}" onclick="showAlarmsConcentracion('alarms.concentracion')" class="col-1 btn btn-default btn-circle btn-alarm">
+								<span th:text="${#httpSession.getAttribute('alarms.concentracion')}"></span>
+							</button>
+						</div>
+
+
+					</div>
+				</li>
+
+				<li class="font-weight-bold nav-item dropdown mr-1 ml-2">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{navbar.link.otros}"></a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" th:href="@{/titulares}" th:text="#{navbar.link.titulares}"></a>
+						<a class="dropdown-item" th:href="@{/recursos}" th:text="#{navbar.link.recursos}"></a>
+						<a class="dropdown-item" th:href="@{/concejos}" th:text="#{navbar.link.concejos}"></a>
+						<a class="dropdown-item" th:href="@{/directoresfacultativos}" th:text="#{navbar.link.directoresfacultativos}"></a>
+
+					</div>
+				</li>
+				<li sec:authorize="hasAuthority('Administrador')" class="font-weight-bold nav-item dropdown mr-1 ml-2">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:text="#{navbar.link.admin}"></a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" th:href="@{/usuarios}" th:text="#{navbar.link.usuarios}"></a>
+						<a class="dropdown-item" th:href="@{/configuracion}" th:text="#{navbar.link.configuracion}"></a>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div sec:authentication="name"></div>
+		<a class="nav-link" th:href="@{/logout}">
+			<i title="Cerrar sesión" class="fas fa-sign-out-alt fa-2x"></i>
+		</a>
+	</nav>
+</div>
+<div th:fragment="navbarWithoutMenu">
+	<nav class="navbar navbar-expand-lg navbar-light bg-white ">
+		<a class="navbar-brand" th:href="@{/}">
+			<img src="/images/logo-catastro-web.png" height="60" alt="">
+		</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse " id="navbarSupportedContent"></div>
+	</nav>
+</div>
+</html>
