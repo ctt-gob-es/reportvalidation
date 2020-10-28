@@ -1,8 +1,12 @@
 package es.oaw.irapvalidator.validator;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -41,9 +45,7 @@ public class XlsxValidator {
 
 		// TODO Validate
 		final Sheet sheet01 = workbook.getSheetAt(1);
-
 		final Sheet sheet02 = workbook.getSheetAt(2);
-
 		final Sheet sheet03 = workbook.getSheetAt(3);
 		final Sheet sheetP1 = workbook.getSheetAt(4);
 		final Sheet sheetP2 = workbook.getSheetAt(5);
@@ -53,6 +55,7 @@ public class XlsxValidator {
 
 		errors.addAll(validateSheet01(sheet01));
 		errors.addAll(validateSheet02(sheet02));
+		errors.addAll(validateSheet03(sheet03));
 
 		return errors;
 
@@ -121,33 +124,35 @@ public class XlsxValidator {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
 		boolean atLeastOneMandatorySelected = false;
-		// C9 --> C13 (at least one selected)
+		// C9 --> C12 mandatories
 
-		String atLeastOneSelectedColumn = "D";
+		String atLeastOneSelectedColumn = "C";
 		int atLeastOneSelectedFirstRow = 9;
 		int atLeastOneSelectedLastRow = 12;
 
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
-			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + atLeastOneSelectedFirstRow + i))) {
+			int j = atLeastOneSelectedFirstRow + i;
+			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + j))) {
 				atLeastOneMandatorySelected = true;
 				break;
 			}
 		}
-		
+
 		if (!atLeastOneMandatorySelected) {
-			errors.add(new ValidationError(sheet.getSheetName(), "", messageSource
-					.getMessage("validation.sheet1.techs.mandatory.atleastone", null, LocaleContextHolder.getLocale())));
+			errors.add(new ValidationError(sheet.getSheetName(), "", messageSource.getMessage(
+					"validation.sheet1.techs.mandatory.atleastone", null, LocaleContextHolder.getLocale())));
 		}
 
 		// C9 --> C13 (at least one selected)
-		atLeastOneSelectedColumn = "D";
+		atLeastOneSelectedColumn = "C";
 		atLeastOneSelectedFirstRow = 9;
 		atLeastOneSelectedLastRow = 13;
 
 		boolean atLeastOneTechSelected = false;
 
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
-			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + atLeastOneSelectedFirstRow + i))) {
+			int j = atLeastOneSelectedFirstRow + i;
+			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + j))) {
 				atLeastOneTechSelected = true;
 				break;
 			}
@@ -157,7 +162,8 @@ public class XlsxValidator {
 		atLeastOneSelectedFirstRow = 9;
 		atLeastOneSelectedLastRow = 13;
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
-			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + atLeastOneSelectedFirstRow + i))) {
+			int j = atLeastOneSelectedFirstRow + i;
+			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + j))) {
 				atLeastOneTechSelected = true;
 				break;
 			}
@@ -169,7 +175,8 @@ public class XlsxValidator {
 
 		// I9 --> C12 (at least one selected)
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
-			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + atLeastOneSelectedFirstRow + i))) {
+			int j = atLeastOneSelectedFirstRow + i;
+			if (SI.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + j))) {
 				atLeastOneTechSelected = true;
 				break;
 			}
@@ -180,6 +187,82 @@ public class XlsxValidator {
 		}
 
 		return errors;
+	}
+
+	/**
+	 * Validate sheet 03.
+	 *
+	 * @param sheet the sheet
+	 * @return the list
+	 */
+	private List<ValidationError> validateSheet03(final Sheet sheet) {
+		List<ValidationError> errors = new ArrayList<ValidationError>();
+
+		final String[] pageTypes = new String[] { "Página inicio", "Inicio de sesión", "Mapa web", "Contacto", "Ayuda",
+				"Legal", "Servicio / Proceso", "Búsqueda", "Declaración accesibilidad", "Mecanismo de comunicación",
+				"Pagina tipo", "Otras páginas", "Documento descargable", "Aleatoria"
+
+		};
+
+		// if from 8 to 42 one of columns c,d,e is filled, this 3 columns will pass
+		// validations
+		int countUrl = 0;
+		for (int r = 8; r < 42; r++) {
+
+			String shortNameCell = "C" + r;
+			String typeCell = "D" + r;
+			String urlCell = "E" + r;
+
+			if (!cellIsEmpty(sheet, shortNameCell) || !cellIsEmpty(sheet, "D" + r) || !cellIsEmpty(sheet, "E" + r)) {
+
+				countUrl++;
+
+				// Check C column if filled
+
+				if (cellIsEmpty(sheet, shortNameCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), shortNameCell,
+							messageSource.getMessage("validation.cell.empty.shortname", new String[] { shortNameCell },
+									LocaleContextHolder.getLocale())));
+
+				}
+
+				// Check D column has a valid value
+
+				if (cellIsEmpty(sheet, typeCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), typeCell, messageSource.getMessage(
+							"validation.cell.empty.type", new String[] { typeCell }, LocaleContextHolder.getLocale())));
+				} else if (Arrays.asList(pageTypes).contains(getCellValue(sheet, typeCell))) {
+					errors.add(new ValidationError(sheet.getSheetName(), typeCell,
+							messageSource.getMessage("validation.cell.invalid.type", new String[] { typeCell },
+									LocaleContextHolder.getLocale())));
+				}
+
+				// Check E column is a valid URL
+
+				if (cellIsEmpty(sheet, urlCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), urlCell, messageSource.getMessage(
+							"validation.cell.empty.url", new String[] { urlCell }, LocaleContextHolder.getLocale())));
+				} else {
+					try {
+						new URL(getCellValue(sheet, urlCell));
+					} catch (MalformedURLException e) {
+						errors.add(new ValidationError(sheet.getSheetName(), urlCell,
+								messageSource.getMessage("validation.cell.invalid.url", new String[] { urlCell },
+										LocaleContextHolder.getLocale())));
+					}
+
+				}
+			}
+
+		}
+
+		// TODO Check if number of indicated
+		if (countUrl > 0) {
+
+		}
+
+		return errors;
+
 	}
 
 	/**
@@ -209,6 +292,26 @@ public class XlsxValidator {
 	 * @return true, if successful
 	 */
 	private boolean cellIsEmpty(final Sheet sheet, final String cellReference) {
+
+		CellReference ref = new CellReference(cellReference);
+		Row r = sheet.getRow(ref.getRow());
+		Cell c = r.getCell(ref.getCol());
+		if (c == null || CellType.BLANK.equals(c.getCellType())
+				|| (CellType.STRING.equals(c.getCellType()) && StringUtils.isEmpty(c.getStringCellValue()))) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Cell is in range.
+	 *
+	 * @param sheet         the sheet
+	 * @param cellReference the cell reference
+	 * @return true, if successful
+	 */
+	private boolean cellIsInRange(final Sheet sheet, final String cellReference) {
 
 		CellReference ref = new CellReference(cellReference);
 		Row r = sheet.getRow(ref.getRow());
