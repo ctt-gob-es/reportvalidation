@@ -1,0 +1,22 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<div th:fragment="content">
+	<h4>Upload Multiple Files:</h4>
+	<form method="POST" enctype="multipart/form-data" action="/files/">
+		<input type="file" name="files" multiple/> <br/><br/>
+		<button type="submit">Submit</button>
+	</form>
+
+	<div>
+		<ul>
+			<li th:each="file : ${files}">
+				<a th:href="${file}" th:text="${file}" />
+			</li>
+		</ul>
+	</div>
+
+	<div th:if="${message}">
+		<h4 th:text="${message}"/>
+	</div>
+
+</div>
+</html>
