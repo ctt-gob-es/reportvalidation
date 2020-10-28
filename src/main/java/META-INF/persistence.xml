@@ -6,5 +6,6 @@
 	<persistence-unit name="irapvalidator">
 		<class>es.oaw.irapvalidator.model.Role</class>
 		<class>es.oaw.irapvalidator.model.User</class>
+		<class>es.oaw.irapvalidator.model.Dir3</class>
 	</persistence-unit>
 </persistence>

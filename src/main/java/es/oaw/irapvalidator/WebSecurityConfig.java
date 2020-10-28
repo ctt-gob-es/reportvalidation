@@ -48,7 +48,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	 */
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.jdbcAuthentication().usersByUsernameQuery(usersQuery).authoritiesByUsernameQuery(rolesQuery).dataSource(dataSource).passwordEncoder(bCryptPasswordEncoder);
+		auth.jdbcAuthentication().usersByUsernameQuery(usersQuery).authoritiesByUsernameQuery(rolesQuery)
+				.dataSource(dataSource).passwordEncoder(bCryptPasswordEncoder);
 	}
 
 	/**
@@ -67,16 +68,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		// All routes secured
-//		http.authorizeRequests().antMatchers("/login").permitAll().antMatchers("/registration").permitAll().antMatchers("/geoserver/**").permitAll().antMatchers("/images/*").permitAll()
-//				.antMatchers("/css/*").permitAll().antMatchers("/js/*").permitAll().anyRequest().authenticated().and().csrf().disable().formLogin().loginPage("/login").failureUrl("/login?error=true")
-//				.defaultSuccessUrl("/", true).usernameParameter("login").passwordParameter("password").and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/")
-//				.and().exceptionHandling().accessDeniedPage("/access-denied");
-
-		http.authorizeRequests().antMatchers("/login").permitAll().antMatchers("/registration").permitAll().antMatchers("/geoserver/**").permitAll().antMatchers("/images/**").permitAll()
-				.antMatchers("/css/**").permitAll().antMatchers("/js/**").permitAll()
-				.anyRequest().authenticated().and().csrf().disable().formLogin().loginPage("/login").failureUrl("/login?error=true")
+		http.authorizeRequests().antMatchers("/login").permitAll().antMatchers("/images/**").permitAll()
+				.antMatchers("/css/**").permitAll().antMatchers("/js/**").permitAll().anyRequest().authenticated().and()
+				.csrf().disable().formLogin().loginPage("/login").failureUrl("/login?error=true")
 				.usernameParameter("login").passwordParameter("password").and().logout()
-				.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/").and().exceptionHandling().accessDeniedPage("/access-denied");
+				.logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/").and()
+				.exceptionHandling().accessDeniedPage("/access-denied");
 		http.cors();
 
 	}

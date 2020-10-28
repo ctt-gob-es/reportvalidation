@@ -19,12 +19,30 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
+import es.oaw.irapvalidator.service.Dir3Service;
+
 /**
  * The Class XlsxValidator.
  */
 @Service
 public class XlsxValidator {
 
+	/** The Constant COLUMN_I. */
+	private static final String COLUMN_I = "I";
+
+	/** The Constant COLUMN_F. */
+	private static final String COLUMN_F = "F";
+
+	/** The Constant COLUMN_D. */
+	private static final String COLUMN_D = "D";
+
+	/** The Constant COLUMN_C. */
+	private static final String COLUMN_C = "C";
+
+	/** The Constant COLUMN_B. */
+	private static final String COLUMN_B = "B";
+
+	/** The Constant MAX_PAGES. */
 	private static final int MAX_PAGES = 35;
 
 	/** The Constant SI. */
@@ -33,9 +51,21 @@ public class XlsxValidator {
 	/** The Constant VALIDATION_CELL_EMPTY. */
 	private static final String VALIDATION_CELL_EMPTY = "validation.cell.empty";
 
+	/** The Constant pageTypes. */
+	private static final String[] pageTypes = new String[] { "Página inicio", "Inicio de sesión", "Mapa web",
+			"Contacto", "Ayuda", "Legal", "Servicio / Proceso", "Búsqueda", "Declaración accesibilidad",
+			"Mecanismo de comunicación", "Pagina tipo", "Otras páginas", "Documento descargable", "Aleatoria" };
+
+	/** The Constant resultTypes. */
+	private static final String[] resultTypes = new String[] { "N/T", "N/D", "N/A", "Falla", "Pasa" };
+
 	/** The message source. */
 	@Autowired
 	private MessageSource messageSource;
+
+	/** The dir 3 service. */
+	@Autowired
+	private Dir3Service dir3Service;
 
 	/** The num pages. */
 	private int numPages = 0;
@@ -49,7 +79,6 @@ public class XlsxValidator {
 	public List<ValidationError> validate(final Workbook workbook) {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
-		// TODO Validate
 		final Sheet sheet01 = workbook.getSheetAt(1);
 		final Sheet sheet02 = workbook.getSheetAt(2);
 		final Sheet sheet03 = workbook.getSheetAt(3);
@@ -66,6 +95,7 @@ public class XlsxValidator {
 		errors.addAll(validateSheetPrinciple(sheetP2, 19, 661));
 		errors.addAll(validateSheetPrinciple(sheetP3, 19, 395));
 		errors.addAll(validateSheetPrinciple(sheetP4, 19, 129));
+		errors.addAll(validateSheetResults(sheetResults));
 		Collections.sort(errors);
 		return errors;
 
@@ -79,12 +109,12 @@ public class XlsxValidator {
 	 */
 	private List<ValidationError> validateSheet01(final Sheet sheet) {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
-		// TODO C9 --> VALIDAR DIR3
-		// TODO C13 --> VALIDAR DIR3
-		final String columnNotEmptyLabel = "B";
-		final String columnNotEmptyValue = "C";
+
+		final String columnNotEmptyLabel = COLUMN_B;
+		final String columnNotEmptyValue = COLUMN_C;
 		final int[] cellNotEmptyRows = new int[] { 7, 9, 11, 13, 17, 19, 21, 25, 27, 29, 31, 33, 35, 39, 41, 45 };
 
+		// Checks cells not empty
 		for (int i = 0; i < cellNotEmptyRows.length; i++) {
 			if (cellIsEmpty(sheet, columnNotEmptyValue + cellNotEmptyRows[i])) {
 				errors.add(new ValidationError(sheet.getSheetName(), columnNotEmptyValue + cellNotEmptyRows[i],
@@ -96,8 +126,31 @@ public class XlsxValidator {
 			}
 		}
 
+		// C9 Validate URA Dir3
+		final String dir3Cell = columnNotEmptyValue + 9;
+		if (!cellIsEmpty(sheet, dir3Cell)) {
+			// dir3 not exists
+			if (!dir3Service.existsDir3(getCellValue(sheet, dir3Cell))) {
+				errors.add(new ValidationError(sheet.getSheetName(), dir3Cell, messageSource.getMessage(
+						"validation.cell.invalid.dir3", new String[] { dir3Cell }, LocaleContextHolder.getLocale())));
+			}
+
+		}
+
+		// C13 Validate URA Ambit Dir3
+		final String dir3AmbitCell = columnNotEmptyValue + 13;
+		if (!cellIsEmpty(sheet, dir3AmbitCell)) {
+			// dir3 not exists
+			if (!dir3Service.existsDir3(getCellValue(sheet, dir3AmbitCell))) {
+				errors.add(new ValidationError(sheet.getSheetName(), dir3AmbitCell,
+						messageSource.getMessage("validation.cell.invalid.dir3ambit", new String[] { dir3AmbitCell },
+								LocaleContextHolder.getLocale())));
+			}
+
+		}
+
 		// D49 --> D59 (at least one selected)
-		final String atLeastOneSelectedColumn = "D";
+		final String atLeastOneSelectedColumn = COLUMN_D;
 		final int atLeastOneSelectedFirstRow = 49;
 		final int atLeastOneSelectedLastRow = 59;
 
@@ -132,12 +185,12 @@ public class XlsxValidator {
 	private List<ValidationError> validateSheet02(final Sheet sheet) {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
-		boolean atLeastOneMandatorySelected = false;
 		// C9 --> C12 mandatories
 
-		String atLeastOneSelectedColumn = "C";
+		String atLeastOneSelectedColumn = COLUMN_C;
 		int atLeastOneSelectedFirstRow = 9;
 		int atLeastOneSelectedLastRow = 12;
+		boolean atLeastOneMandatorySelected = false;
 
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
 			int j = atLeastOneSelectedFirstRow + i;
@@ -153,7 +206,7 @@ public class XlsxValidator {
 		}
 
 		// C9 --> C13 (at least one selected)
-		atLeastOneSelectedColumn = "C";
+		atLeastOneSelectedColumn = COLUMN_C;
 		atLeastOneSelectedFirstRow = 9;
 		atLeastOneSelectedLastRow = 13;
 
@@ -167,7 +220,7 @@ public class XlsxValidator {
 			}
 		}
 		// F9 --> F13 (at least one selected)
-		atLeastOneSelectedColumn = "F";
+		atLeastOneSelectedColumn = COLUMN_F;
 		atLeastOneSelectedFirstRow = 9;
 		atLeastOneSelectedLastRow = 13;
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
@@ -178,7 +231,7 @@ public class XlsxValidator {
 			}
 		}
 
-		atLeastOneSelectedColumn = "I";
+		atLeastOneSelectedColumn = COLUMN_I;
 		atLeastOneSelectedFirstRow = 9;
 		atLeastOneSelectedLastRow = 12;
 
@@ -207,12 +260,6 @@ public class XlsxValidator {
 	private List<ValidationError> validateSheet03(final Sheet sheet) {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
-		final String[] pageTypes = new String[] { "Página inicio", "Inicio de sesión", "Mapa web", "Contacto", "Ayuda",
-				"Legal", "Servicio / Proceso", "Búsqueda", "Declaración accesibilidad", "Mecanismo de comunicación",
-				"Pagina tipo", "Otras páginas", "Documento descargable", "Aleatoria"
-
-		};
-
 		// if from 8 to 42 one of columns c,d,e is filled, this 3 columns will pass
 		// validations
 
@@ -220,10 +267,10 @@ public class XlsxValidator {
 		for (int i = 0; i < 35; i++) {
 
 			int currentRow = i + initRow;
-			String shortNameCell = "C" + currentRow;
-			String typeCell = "D" + currentRow;
+			String shortNameCell = COLUMN_C + currentRow;
+			String typeCell = COLUMN_D + currentRow;
 			String urlCell = "E" + currentRow;
-			String breadcumbCell = "F" + currentRow;
+			String breadcumbCell = COLUMN_F + currentRow;
 
 			if (!cellIsEmpty(sheet, shortNameCell) || !cellIsEmpty(sheet, typeCell) || !cellIsEmpty(sheet, urlCell)
 					|| !cellIsEmpty(sheet, breadcumbCell)) {
@@ -298,8 +345,6 @@ public class XlsxValidator {
 	 */
 	private List<ValidationError> validateSheetPrinciple(final Sheet sheet, final int beginRow, final int endRow) {
 
-		final String[] resultTypes = new String[] { "N/T", "N/D", "N/A", "Falla", "Pasa" };
-
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
 		// Check for every table if num of results registred is the same of detected
@@ -317,9 +362,9 @@ public class XlsxValidator {
 			for (int i = 0; i < MAX_PAGES; i++) {
 
 				int currentRow = tableRowIndex + i;
-				String pageTitleCell = "B" + currentRow;
-				String pageUrlCell = "C" + currentRow;
-				String pageResultCell = "D" + currentRow;
+				String pageTitleCell = COLUMN_B + currentRow;
+				String pageUrlCell = COLUMN_C + currentRow;
+				String pageResultCell = COLUMN_D + currentRow;
 
 				if (!cellIsEmpty(sheet, pageTitleCell) || !cellIsEmpty(sheet, pageUrlCell)
 						|| !cellIsEmpty(sheet, pageResultCell)) {
@@ -330,14 +375,14 @@ public class XlsxValidator {
 			// Less or greater than filled
 			if (countFilled < numPages) {
 
-				String principleTitleCell = "C" + (tableRowIndex - 1);
+				String principleTitleCell = COLUMN_C + (tableRowIndex - 1);
 
 				errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
 						messageSource.getMessage("validation.principle.less.pages",
 								new String[] { getCellValue(sheet, principleTitleCell) },
 								LocaleContextHolder.getLocale())));
 			} else if (countFilled > numPages) {
-				String principleTitleCell = "C" + (tableRowIndex - 1);
+				String principleTitleCell = COLUMN_C + (tableRowIndex - 1);
 
 				errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
 						messageSource.getMessage("validation.principle.greater.pages",
@@ -350,9 +395,9 @@ public class XlsxValidator {
 			for (int i = 0; i < numPages; i++) {
 
 				int currentRow = tableRowIndex + i;
-				String pageTitleCell = "B" + currentRow;
-				String pageUrlCell = "C" + currentRow;
-				String pageResultCell = "D" + currentRow;
+				String pageTitleCell = COLUMN_B + currentRow;
+				String pageUrlCell = COLUMN_C + currentRow;
+				String pageResultCell = COLUMN_D + currentRow;
 
 				// Check B column if filled
 
@@ -400,6 +445,23 @@ public class XlsxValidator {
 	}
 
 	/**
+	 * Validate sheet results.
+	 *
+	 * @param sheet    the sheet
+	 * @return the list
+	 */
+	private List<ValidationError> validateSheetResults(final Sheet sheet) {
+
+		List<ValidationError> errors = new ArrayList<ValidationError>();
+		//B-C-19 --> 53 filled
+		//B-C-60 --> 94 filled
+		//Check values in this sheet are same in principles 
+		//D54 --> AG54 not in finished
+		//D95 --> W54 not in finished
+		return errors;
+	}
+
+	/**
 	 * Gets the cell value.
 	 *
 	 * @param sheet         the sheet
@@ -436,58 +498,6 @@ public class XlsxValidator {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Fill not tell.
-	 *
-	 * @param workbook   the workbook
-	 * @param totalPages the total pages
-	 */
-	private static void fillNotTell(final Workbook workbook, final int totalPages) {
-		final Sheet sheetP1 = workbook.getSheet("P1.Perceptible");
-		int tableRowIndex = 19;
-		while (tableRowIndex <= 776) {
-			for (int i = 0; i < totalPages; i++) {
-				final Cell cell = sheetP1.getRow(i + tableRowIndex - 1).getCell(3);
-//				cell.setCellFormula(null);
-				cell.setCellValue("N/T");
-			}
-			tableRowIndex = tableRowIndex + 38;
-		}
-		final Sheet sheetP2 = workbook.getSheet("P2.Operable");
-		tableRowIndex = 19;
-		while (tableRowIndex <= 661) {
-			for (int i = 0; i < totalPages; i++) {
-				final Cell cell = sheetP2.getRow(i + tableRowIndex - 1).getCell(3);
-				cell.setCellFormula(null);
-//				cell.setCellType(CellType.STRING);
-				cell.setCellValue("N/T");
-			}
-			tableRowIndex = tableRowIndex + 38;
-		}
-		final Sheet sheetP3 = workbook.getSheet("P3.Comprensible");
-		tableRowIndex = 19;
-		while (tableRowIndex <= 395) {
-			for (int i = 0; i < totalPages; i++) {
-				final Cell cell = sheetP3.getRow(i + tableRowIndex - 1).getCell(3);
-				cell.setCellFormula(null);
-//				cell.setCellType(CellType.STRING);
-				cell.setCellValue("N/T");
-			}
-			tableRowIndex = tableRowIndex + 38;
-		}
-		final Sheet sheetP4 = workbook.getSheet("P4.Robusto");
-		tableRowIndex = 19;
-		while (tableRowIndex <= 129) {
-			for (int i = 0; i < totalPages; i++) {
-				final Cell cell = sheetP4.getRow(i + tableRowIndex - 1).getCell(3);
-				cell.setCellFormula(null);
-//				cell.setCellType(CellType.STRING);
-				cell.setCellValue("N/T");
-			}
-			tableRowIndex = tableRowIndex + 38;
-		}
 	}
 
 }
