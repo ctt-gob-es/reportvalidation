@@ -30,11 +30,8 @@ public class IndexController {
 	 */
 	@GetMapping
 	public String index(Model model, HttpSession session) {
-
-		model.addAttribute("content", "../fragments/index");
-
-		return Constants.TEMPLATE_LOGGED_IN;
-
+		model.addAttribute("content", "../fragments/uploadForm");
+		return "redirect:/files/";
 	}
 
 	/**
