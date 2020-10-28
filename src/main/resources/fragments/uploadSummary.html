@@ -1,0 +1,42 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<div th:fragment="content">
+	<h2>Validador IRAP</h2>
+	<h4>Resumen validación de ficheros:</h4>
+
+	<h4>Ficheros válidos:</h4>
+	<div>
+		<ul>
+			<li th:each="filename : ${valid}">
+				<a th:text="${filename}" />
+			</li>
+		</ul>
+	</div>
+
+	<h4>Ficheros no válidos:</h4>
+	<table>
+		<thead>
+		<tr>
+			<th> Fichero </th>
+			<th> Errores </th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr th:if="${invalid.empty}">
+			<td colspan="2"> No hay ficheros inválidos</td>
+		</tr>
+		<tr th:each="errorInfo : ${invalid}">
+			<td><span th:text="${errorInfo.filename}"> Fichero </span></td>
+			<td>
+				<ul>
+					<li th:each="error : ${errorInfo.errors}" th:text="${error}">Error</li>
+				</ul>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+
+	<a th:href="@{/}">Volver</a>
+
+
+</div>
+</html>
