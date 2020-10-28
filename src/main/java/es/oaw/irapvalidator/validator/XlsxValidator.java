@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class XlsxValidator {
 
+	private static final int MAX_PAGES = 35;
+
 	/** The Constant SI. */
 	private static final String SI = "Sí";
 
@@ -33,6 +36,9 @@ public class XlsxValidator {
 	/** The message source. */
 	@Autowired
 	private MessageSource messageSource;
+
+	/** The num pages. */
+	private int numPages = 0;
 
 	/**
 	 * Validate.
@@ -56,7 +62,11 @@ public class XlsxValidator {
 		errors.addAll(validateSheet01(sheet01));
 		errors.addAll(validateSheet02(sheet02));
 		errors.addAll(validateSheet03(sheet03));
-
+		errors.addAll(validateSheetPrinciple(sheetP1, 19, 776));
+		errors.addAll(validateSheetPrinciple(sheetP2, 19, 661));
+		errors.addAll(validateSheetPrinciple(sheetP3, 19, 395));
+		errors.addAll(validateSheetPrinciple(sheetP4, 19, 129));
+		Collections.sort(errors);
 		return errors;
 
 	}
@@ -77,12 +87,11 @@ public class XlsxValidator {
 
 		for (int i = 0; i < cellNotEmptyRows.length; i++) {
 			if (cellIsEmpty(sheet, columnNotEmptyValue + cellNotEmptyRows[i])) {
-				errors.add(
-						new ValidationError(sheet.getSheetName(), columnNotEmptyValue + cellNotEmptyRows[i],
-								messageSource.getMessage(VALIDATION_CELL_EMPTY,
-										new String[] { columnNotEmptyValue + cellNotEmptyRows[i],
-												columnNotEmptyLabel + cellNotEmptyRows[i] },
-										LocaleContextHolder.getLocale())));
+				errors.add(new ValidationError(sheet.getSheetName(), columnNotEmptyValue + cellNotEmptyRows[i],
+						messageSource.getMessage(VALIDATION_CELL_EMPTY,
+								new String[] { columnNotEmptyValue + cellNotEmptyRows[i],
+										getCellValue(sheet, columnNotEmptyLabel + cellNotEmptyRows[i]) },
+								LocaleContextHolder.getLocale())));
 
 			}
 		}
@@ -206,16 +215,21 @@ public class XlsxValidator {
 
 		// if from 8 to 42 one of columns c,d,e is filled, this 3 columns will pass
 		// validations
-		int countUrl = 0;
-		for (int r = 8; r < 42; r++) {
 
-			String shortNameCell = "C" + r;
-			String typeCell = "D" + r;
-			String urlCell = "E" + r;
+		int initRow = 8;
+		for (int i = 0; i < 35; i++) {
 
-			if (!cellIsEmpty(sheet, shortNameCell) || !cellIsEmpty(sheet, "D" + r) || !cellIsEmpty(sheet, "E" + r)) {
+			int currentRow = i + initRow;
+			String shortNameCell = "C" + currentRow;
+			String typeCell = "D" + currentRow;
+			String urlCell = "E" + currentRow;
+			String breadcumbCell = "F" + currentRow;
 
-				countUrl++;
+			if (!cellIsEmpty(sheet, shortNameCell) || !cellIsEmpty(sheet, typeCell) || !cellIsEmpty(sheet, urlCell)
+					|| !cellIsEmpty(sheet, breadcumbCell)) {
+
+				// If detect any cell filled, count
+				numPages++;
 
 				// Check C column if filled
 
@@ -231,7 +245,7 @@ public class XlsxValidator {
 				if (cellIsEmpty(sheet, typeCell)) {
 					errors.add(new ValidationError(sheet.getSheetName(), typeCell, messageSource.getMessage(
 							"validation.cell.empty.type", new String[] { typeCell }, LocaleContextHolder.getLocale())));
-				} else if (Arrays.asList(pageTypes).contains(getCellValue(sheet, typeCell))) {
+				} else if (!Arrays.asList(pageTypes).contains(getCellValue(sheet, typeCell))) {
 					errors.add(new ValidationError(sheet.getSheetName(), typeCell,
 							messageSource.getMessage("validation.cell.invalid.type", new String[] { typeCell },
 									LocaleContextHolder.getLocale())));
@@ -252,17 +266,137 @@ public class XlsxValidator {
 					}
 
 				}
+
+				// Check F column if filled
+
+				if (cellIsEmpty(sheet, breadcumbCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), breadcumbCell,
+							messageSource.getMessage("validation.cell.empty.breadcumb", new String[] { breadcumbCell },
+									LocaleContextHolder.getLocale())));
+
+				}
 			}
 
 		}
 
 		// TODO Check if number of indicated
-		if (countUrl > 0) {
+		if (numPages > 0) {
 
 		}
 
 		return errors;
 
+	}
+
+	/**
+	 * Validate sheet principle.
+	 *
+	 * @param sheet    the sheet
+	 * @param beginRow the begin row
+	 * @param endRow   the end row
+	 * @return the list
+	 */
+	private List<ValidationError> validateSheetPrinciple(final Sheet sheet, final int beginRow, final int endRow) {
+
+		final String[] resultTypes = new String[] { "N/T", "N/D", "N/A", "Falla", "Pasa" };
+
+		List<ValidationError> errors = new ArrayList<ValidationError>();
+
+		// Check for every table if num of results registred is the same of detected
+		// pages
+
+		// Begin of table data. Evary table has 35 rows. Next table begins 38 next
+		int tableRowIndex = beginRow;
+
+		while (tableRowIndex <= endRow) {
+
+			// First check filled rows
+
+			int countFilled = 0;
+
+			for (int i = 0; i < MAX_PAGES; i++) {
+
+				int currentRow = tableRowIndex + i;
+				String pageTitleCell = "B" + currentRow;
+				String pageUrlCell = "C" + currentRow;
+				String pageResultCell = "D" + currentRow;
+
+				if (!cellIsEmpty(sheet, pageTitleCell) || !cellIsEmpty(sheet, pageUrlCell)
+						|| !cellIsEmpty(sheet, pageResultCell)) {
+					countFilled++;
+				}
+			}
+
+			// Less or greater than filled
+			if (countFilled < numPages) {
+
+				String principleTitleCell = "C" + (tableRowIndex - 1);
+
+				errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+						messageSource.getMessage("validation.principle.less.pages",
+								new String[] { getCellValue(sheet, principleTitleCell) },
+								LocaleContextHolder.getLocale())));
+			} else if (countFilled > numPages) {
+				String principleTitleCell = "C" + (tableRowIndex - 1);
+
+				errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+						messageSource.getMessage("validation.principle.greater.pages",
+								new String[] { getCellValue(sheet, principleTitleCell) },
+								LocaleContextHolder.getLocale())));
+
+			}
+
+			// Check for all numPages the columns B,C and D are valid
+			for (int i = 0; i < numPages; i++) {
+
+				int currentRow = tableRowIndex + i;
+				String pageTitleCell = "B" + currentRow;
+				String pageUrlCell = "C" + currentRow;
+				String pageResultCell = "D" + currentRow;
+
+				// Check B column if filled
+
+				if (cellIsEmpty(sheet, pageTitleCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), pageTitleCell,
+							messageSource.getMessage("validation.cell.empty.shortname", new String[] { pageTitleCell },
+									LocaleContextHolder.getLocale())));
+
+				}
+
+				// Check C column is a valid URL
+
+				if (cellIsEmpty(sheet, pageUrlCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), pageUrlCell,
+							messageSource.getMessage("validation.cell.empty.url", new String[] { pageUrlCell },
+									LocaleContextHolder.getLocale())));
+				} else {
+					try {
+						new URL(getCellValue(sheet, pageUrlCell));
+					} catch (MalformedURLException e) {
+						errors.add(new ValidationError(sheet.getSheetName(), pageUrlCell,
+								messageSource.getMessage("validation.cell.invalid.url", new String[] { pageUrlCell },
+										LocaleContextHolder.getLocale())));
+					}
+
+				}
+
+				// Check D column if filled
+
+				if (cellIsEmpty(sheet, pageResultCell)) {
+					errors.add(new ValidationError(sheet.getSheetName(), pageResultCell,
+							messageSource.getMessage("validation.cell.empty.result", new String[] { pageResultCell },
+									LocaleContextHolder.getLocale())));
+				} else if (!Arrays.asList(resultTypes).contains(getCellValue(sheet, pageResultCell))) {
+					errors.add(new ValidationError(sheet.getSheetName(), pageResultCell,
+							messageSource.getMessage("validation.cell.invalid.result", new String[] { pageResultCell },
+									LocaleContextHolder.getLocale())));
+				}
+
+			}
+			tableRowIndex = tableRowIndex + 38;
+		}
+
+		return errors;
 	}
 
 	/**
@@ -305,22 +439,55 @@ public class XlsxValidator {
 	}
 
 	/**
-	 * Cell is in range.
+	 * Fill not tell.
 	 *
-	 * @param sheet         the sheet
-	 * @param cellReference the cell reference
-	 * @return true, if successful
+	 * @param workbook   the workbook
+	 * @param totalPages the total pages
 	 */
-	private boolean cellIsInRange(final Sheet sheet, final String cellReference) {
-
-		CellReference ref = new CellReference(cellReference);
-		Row r = sheet.getRow(ref.getRow());
-		Cell c = r.getCell(ref.getCol());
-		if (c == null || c.getCellType() == CellType.BLANK) {
-			return true;
+	private static void fillNotTell(final Workbook workbook, final int totalPages) {
+		final Sheet sheetP1 = workbook.getSheet("P1.Perceptible");
+		int tableRowIndex = 19;
+		while (tableRowIndex <= 776) {
+			for (int i = 0; i < totalPages; i++) {
+				final Cell cell = sheetP1.getRow(i + tableRowIndex - 1).getCell(3);
+//				cell.setCellFormula(null);
+				cell.setCellValue("N/T");
+			}
+			tableRowIndex = tableRowIndex + 38;
 		}
-
-		return false;
+		final Sheet sheetP2 = workbook.getSheet("P2.Operable");
+		tableRowIndex = 19;
+		while (tableRowIndex <= 661) {
+			for (int i = 0; i < totalPages; i++) {
+				final Cell cell = sheetP2.getRow(i + tableRowIndex - 1).getCell(3);
+				cell.setCellFormula(null);
+//				cell.setCellType(CellType.STRING);
+				cell.setCellValue("N/T");
+			}
+			tableRowIndex = tableRowIndex + 38;
+		}
+		final Sheet sheetP3 = workbook.getSheet("P3.Comprensible");
+		tableRowIndex = 19;
+		while (tableRowIndex <= 395) {
+			for (int i = 0; i < totalPages; i++) {
+				final Cell cell = sheetP3.getRow(i + tableRowIndex - 1).getCell(3);
+				cell.setCellFormula(null);
+//				cell.setCellType(CellType.STRING);
+				cell.setCellValue("N/T");
+			}
+			tableRowIndex = tableRowIndex + 38;
+		}
+		final Sheet sheetP4 = workbook.getSheet("P4.Robusto");
+		tableRowIndex = 19;
+		while (tableRowIndex <= 129) {
+			for (int i = 0; i < totalPages; i++) {
+				final Cell cell = sheetP4.getRow(i + tableRowIndex - 1).getCell(3);
+				cell.setCellFormula(null);
+//				cell.setCellType(CellType.STRING);
+				cell.setCellValue("N/T");
+			}
+			tableRowIndex = tableRowIndex + 38;
+		}
 	}
 
 }

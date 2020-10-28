@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * The Class ValidationError.
  */
-public class ValidationError implements Serializable {
+public class ValidationError implements Serializable, Comparable<ValidationError> {
 
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = -4559722023409078582L;
@@ -95,6 +95,18 @@ public class ValidationError implements Serializable {
 	@Override
 	public String toString() {
 		return "ValidationError [sheet=" + sheet + ", cell=" + cell + ", message=" + message + "]";
+	}
+
+	/**
+	 * Compare to.
+	 *
+	 * @param o the o
+	 * @return the int
+	 */
+	@Override
+	public int compareTo(ValidationError o) {
+
+		return this.getSheet().compareToIgnoreCase(o.getSheet());
 	}
 
 }
