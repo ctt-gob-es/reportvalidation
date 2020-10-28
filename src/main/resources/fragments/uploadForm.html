@@ -1,11 +1,14 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <div th:fragment="content">
-	<h4>Upload Multiple Files:</h4>
+	<h2>Validador IRAP</h2>
+	<h4>Validación de ficheros:</h4>
+	<p>Agrega archivos a validar y pulsa el botón "Subir ficheros"</p>
 	<form method="POST" enctype="multipart/form-data" action="/files/">
 		<input type="file" name="files" multiple/> <br/><br/>
-		<button type="submit">Submit</button>
+		<button type="submit">Subir ficheros</button>
 	</form>
 
+	<h4>Ficheros almacenados:</h4>
 	<div>
 		<ul>
 			<li th:each="file : ${files}">
