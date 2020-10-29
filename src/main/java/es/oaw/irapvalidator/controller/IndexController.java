@@ -2,6 +2,7 @@ package es.oaw.irapvalidator.controller;
 
 import javax.servlet.http.HttpSession;
 
+import es.oaw.irapvalidator.Constants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,6 @@ public class IndexController {
 	 */
 	@GetMapping
 	public String index(Model model, HttpSession session) {
-		model.addAttribute("content", "../fragments/uploadForm");
 		return "redirect:/files/";
 	}
 
