@@ -8,10 +8,18 @@ public final class Constants {
 	/** The Constant TEMPLATE_LOGGED_IN. */
 	public static final String TEMPLATE_LOGGED_IN = "templateLoggedIn";
 
-
+	/** The Constant UPLOAD_CONTROLLER_PATH. */
 	public static final String UPLOAD_CONTROLLER_PATH = "/files";
 
+	/** The Constant FRAGMENT_UPLOAD_FORM. */
 	public static final String FRAGMENT_UPLOAD_FORM = "uploadForm";
+
+	/** The Constant FRAGMENT_UPLOAD_SUMMARY. */
 	public static final String FRAGMENT_UPLOAD_SUMMARY = "uploadSummary";
+
+	/** The Constant ASC. */
+	public static final String ASC = "asc";
+	/** The Constant MODEL_KEY_CONTENT. */
+	public static final String MODEL_KEY_CONTENT = "content";
 
 }

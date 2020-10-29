@@ -7,11 +7,16 @@ CREATE TABLE role (
 
 
 DROP TABLE IF EXISTS user;
+
 CREATE TABLE user (
-  id int(11) NOT NULL,
+  id int(11) NOT NULL AUTO_INCREMENT,
   active int(11) DEFAULT '1',
   username varchar(255) DEFAULT NULL,
   password varchar(255) DEFAULT NULL,
+  name varchar(255) DEFAULT NULL,
+  surname varchar(255) DEFAULT NULL,
+  email varchar(255) DEFAULT NULL,
+  ura varchar(255) DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -27,6 +32,7 @@ CREATE TABLE user_role (
 
 
 INSERT INTO role (id, name) VALUES (1, 'admin');
+INSERT INTO role (id, name) VALUES (2, 'ura');
 INSERT INTO user (id, active, password, username) VALUES (1, 1, '$2a$10$rka.WSq6t.6K3PQspxBXh.MPi5RIeqI45tUFrLjRAIM/dMAoeKnPK', 'admin');
 INSERT INTO user_role (id_user, id_role) VALUES (1, 1);
 

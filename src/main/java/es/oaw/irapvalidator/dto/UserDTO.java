@@ -1,35 +1,22 @@
-package es.oaw.irapvalidator.model;
+package es.oaw.irapvalidator.dto;
 
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import es.oaw.irapvalidator.model.Role;
+
 /**
- * The persistent class for the usuario database table.
- * 
+ * The Class UsuarioDTO.
  */
-@Entity
-@Table(name = "user")
-@NamedQuery(name = "User.findAll", query = "SELECT u FROM User u")
-public class User implements Serializable {
+public class UserDTO implements Serializable {
 
 	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2566597506016623695L;
 
 	/** The id usuario. */
-	@Id
-	@GeneratedValue
 	private Integer id;
 
 	/** The activo. */
@@ -45,6 +32,14 @@ public class User implements Serializable {
 	@NotEmpty(message = "{field.required}")
 	private String password;
 
+	/** The password anterior. */
+	private String prevoiusPassword;
+
+	/** The password repetir. */
+	@NotNull(message = "{field.required}")
+	@NotEmpty(message = "{field.required}")
+	private String repeatPassword;
+
 	/** The nombre. */
 	@NotNull(message = "{field.required}")
 	@NotEmpty(message = "{field.required}")
@@ -52,18 +47,14 @@ public class User implements Serializable {
 
 	/** The apellidos. */
 	private String surname;
-	
+
 	/** The email. */
 	private String email;
-	
+
 	/** The ura. */
 	private String ura;
 
 	/** The rols. */
-	// bi-directional many-to-many association to Rol
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-	@JoinTable(name = "user_role", joinColumns = { @JoinColumn(name = "id_user") }, inverseJoinColumns = {
-			@JoinColumn(name = "id_role") })
 	private List<Role> roles;
 
 	/**
@@ -139,21 +130,39 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Gets the roles.
+	 * Gets the prevoius password.
 	 *
-	 * @return the roles
+	 * @return the prevoius password
 	 */
-	public List<Role> getRoles() {
-		return roles;
+	public String getPrevoiusPassword() {
+		return prevoiusPassword;
 	}
 
 	/**
-	 * Sets the roles.
+	 * Sets the prevoius password.
 	 *
-	 * @param roles the new roles
+	 * @param prevoiusPassword the new prevoius password
 	 */
-	public void setRoles(List<Role> roles) {
-		this.roles = roles;
+	public void setPrevoiusPassword(String prevoiusPassword) {
+		this.prevoiusPassword = prevoiusPassword;
+	}
+
+	/**
+	 * Gets the repeat password.
+	 *
+	 * @return the repeat password
+	 */
+	public String getRepeatPassword() {
+		return repeatPassword;
+	}
+
+	/**
+	 * Sets the repeat password.
+	 *
+	 * @param repeatPassword the new repeat password
+	 */
+	public void setRepeatPassword(String repeatPassword) {
+		this.repeatPassword = repeatPassword;
 	}
 
 	/**
@@ -190,6 +199,24 @@ public class User implements Serializable {
 	 */
 	public void setSurname(String surname) {
 		this.surname = surname;
+	}
+
+	/**
+	 * Gets the roles.
+	 *
+	 * @return the roles
+	 */
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * Sets the roles.
+	 *
+	 * @param roles the new roles
+	 */
+	public void setRoles(List<Role> roles) {
+		this.roles = roles;
 	}
 
 	/**

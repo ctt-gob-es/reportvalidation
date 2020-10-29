@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http:/www.thymeleaf.org">
+<div th:fragment="content">
+	<nav aria-label="breadcrumb">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="/"
+				th:text="#{breadcrumb.home}"></a></li>
+			<li class="breadcrumb-item" th:text="#{breadcrumb.admin}"></li>
+			<li class="breadcrumb-item"><a href="/users"
+				th:text="#{breadcrumb.users}"></a></li>
+			<li class="breadcrumb-item active" aria-current="page"
+				th:text="#{breadcrumb.user.add}"></li>
+		</ol>
+	</nav>
+
+	<div class="container-fluid">
+		<h4 th:text="#{breadcrumb.user.add}"></h4>
+
+		<div class="card">
+			<div class="card-body">
+
+				<form action="#" th:action="@{/users/save}" th:object="${user}"
+					method="post">
+					<div class="form-group">
+						<label for="name" th:text="#{users.form.name.label}"></label> <input
+							th:classappend="${#fields.hasErrors('name')} ? is-invalid "
+							th:field="*{name}" type="text" class="form-control" id="name" />
+						<span class="text-danger" th:if="${#fields.hasErrors('name')}"
+							th:errors="*{name}"></span>
+					</div>
+
+					<div class="form-group">
+						<label for="surname" th:text="#{users.form.surname.label}"></label>
+						<input
+							th:classappend="${#fields.hasErrors('surname')} ? is-invalid "
+							th:field="*{surname}" type="text" class="form-control"
+							id="surname" /> <span class="text-danger"
+							th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}"></span>
+					</div>
+
+					<div class="form-group">
+						<label for="email" th:text="#{users.form.email.label}"></label> <input
+							th:classappend="${#fields.hasErrors('email')} ? is-invalid "
+							th:field="*{email}" type="text" class="form-control" id="email" />
+						<span class="text-danger" th:if="${#fields.hasErrors('email')}"
+							th:errors="*{email}"></span>
+					</div>
+
+					<div class="form-group">
+						<label for="ura" th:text="#{users.form.ura.label}"></label> <input
+							th:classappend="${#fields.hasErrors('ura')} ? is-invalid "
+							th:field="*{ura}" type="text" class="form-control" id="ura" /> <span
+							class="text-danger" th:if="${#fields.hasErrors('ura')}"
+							th:errors="*{ura}"></span>
+					</div>
+
+					<div class="form-group">
+						<label for="username" th:text="#{users.form.username.label}"></label>
+						<input
+							th:classappend="${#fields.hasErrors('username')} ? is-invalid "
+							th:field="*{username}" type="text" class="form-control"
+							id="surname" /> <span class="text-danger"
+							th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+					</div>
+
+					<div class="form-group">
+						<label for="password" th:text="#{users.form.password.label}"></label>
+						<input
+							th:classappend="${#fields.hasErrors('password')} ? is-invalid "
+							th:field="*{password}" type="password" class="form-control"
+							id="password" /> <span class="text-danger"
+							th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+					</div>
+
+					<div class="form-group">
+						<label for="repeatPassword"
+							th:text="#{users.form.password.repeat.label}"></label> <input
+							th:classappend="${#fields.hasErrors('repeatPassword')} ? is-invalid "
+							th:field="*{repeatPassword}" type="password" class="form-control"
+							id="repeatPassword" /> <span class="text-danger"
+							th:if="${#fields.hasErrors('repeatPassword')}"
+							th:errors="*{repeatPassword}"></span>
+					</div>
+
+					<div class="form-group ">
+						<label for="roles" th:text="#{users.form.rol.label}"></label> <select
+							class="form-control" id="roles" th:field="*{roles}">
+							<option th:each="rol : ${roles}" th:value="${rol.id}"
+								th:text="${rol.name}"></option>
+						</select>
+					</div>
+
+
+					<button type="submit" class="btn btn-primary"
+						th:text="#{button.submit}"></button>
+					<a class="btn btn-secondary" href="/users"
+						th:text="#{button.cancel}"></a>
+				</form>
+
+			</div>
+		</div>
+	</div>
+</div>
