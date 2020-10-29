@@ -6,27 +6,63 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import es.oaw.irapvalidator.validator.OdsValidator;
 import es.oaw.irapvalidator.validator.ValidationError;
 import es.oaw.irapvalidator.validator.XlsxValidator;
 
+/**
+ * The Class IrapvalidatorApplicationTests.
+ */
 @SpringBootTest
 class IrapvalidatorApplicationTests {
 
+	/** The xlsx validator. */
 	@Autowired
 	private XlsxValidator xlsxValidator;
 
+	/** The ods validator. */
+	@Autowired
+	private OdsValidator odsValidator;
+
+	/**
+	 * Test XLSX.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
-	void textXlsx() throws Exception {
+	void testXLSX() throws Exception {
 
 		File inputFile = new File(
 				"/home/alvaro/Development/Projects/irapvalidator/src/test/resources/Informe_Revision_Profunidad_v1.xlsx");
 		FileInputStream inputStream = new FileInputStream(inputFile);
 		XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
 		List<ValidationError> errors = xlsxValidator.validate(workbook);
+		if (!CollectionUtils.isEmpty(errors)) {
+			for (ValidationError error : errors) {
+				System.out.println(error.toString());
+			}
+
+		}
+
+	}
+
+	/**
+	 * Test ODS.
+	 *
+	 * @throws Exception the exception
+	 */
+	@Test
+	void testODS() throws Exception {
+
+		File inputFile = new File(
+				"/home/alvaro/Development/Projects/irapvalidator/src/test/resources/Informe_Revision_Profunidad_v1.ods");
+		final SpreadSheet workbook = SpreadSheet.createFromFile(inputFile);
+		List<ValidationError> errors = odsValidator.validate(workbook);
 		if (!CollectionUtils.isEmpty(errors)) {
 			for (ValidationError error : errors) {
 				System.out.println(error.toString());

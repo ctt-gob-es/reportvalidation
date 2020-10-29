@@ -8,13 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
+import org.jopendocument.dom.spreadsheet.MutableCell;
+import org.jopendocument.dom.spreadsheet.Sheet;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -23,10 +20,10 @@ import org.springframework.stereotype.Service;
 import es.oaw.irapvalidator.service.Dir3Service;
 
 /**
- * The Class ValidatorConstants.
+ * The Class XlsxValidator.
  */
 @Service
-public class XlsxValidator {
+public class OdsValidator {
 
 	/** The message source. */
 	@Autowired
@@ -39,26 +36,23 @@ public class XlsxValidator {
 	/** The num pages. */
 	private int numPages = 0;
 
-	private FormulaEvaluator evaluator;
-
 	/**
 	 * Validate.
 	 *
 	 * @param workbook the workbook
 	 * @return the list
 	 */
-	public List<ValidationError> validate(final Workbook workbook) {
+	public List<ValidationError> validate(final SpreadSheet workbook) {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
-		evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-		final Sheet sheet01 = workbook.getSheetAt(1);
-		final Sheet sheet02 = workbook.getSheetAt(2);
-		final Sheet sheet03 = workbook.getSheetAt(3);
-		final Sheet sheetP1 = workbook.getSheetAt(4);
-		final Sheet sheetP2 = workbook.getSheetAt(5);
-		final Sheet sheetP3 = workbook.getSheetAt(6);
-		final Sheet sheetP4 = workbook.getSheetAt(7);
-		final Sheet sheetResults = workbook.getSheetAt(8);
+		final Sheet sheet01 = workbook.getSheet(1);
+		final Sheet sheet02 = workbook.getSheet(2);
+		final Sheet sheet03 = workbook.getSheet(3);
+		final Sheet sheetP1 = workbook.getSheet(4);
+		final Sheet sheetP2 = workbook.getSheet(5);
+		final Sheet sheetP3 = workbook.getSheet(6);
+		final Sheet sheetP4 = workbook.getSheet(7);
+		final Sheet sheetResults = workbook.getSheet(8);
 
 		errors.addAll(validateSheet01(sheet01));
 		errors.addAll(validateSheet02(sheet02));
@@ -88,7 +82,7 @@ public class XlsxValidator {
 		// Checks cells not empty
 		for (int i = 0; i < ValidatorConstants.SHEET_01_MANDATORY_CONTENT_ROWS.length; i++) {
 			if (cellIsEmpty(sheet, columnNotEmptyValue + ValidatorConstants.SHEET_01_MANDATORY_CONTENT_ROWS[i])) {
-				errors.add(new ValidationError(sheet.getSheetName(),
+				errors.add(new ValidationError(sheet.getName(),
 						columnNotEmptyValue + ValidatorConstants.SHEET_01_MANDATORY_CONTENT_ROWS[i],
 						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY, new String[] {
 								columnNotEmptyValue + ValidatorConstants.SHEET_01_MANDATORY_CONTENT_ROWS[i],
@@ -104,7 +98,7 @@ public class XlsxValidator {
 		if (!cellIsEmpty(sheet, dir3Cell)) {
 			// dir3 not exists
 			if (!dir3Service.existsDir3(getCellValue(sheet, dir3Cell))) {
-				errors.add(new ValidationError(sheet.getSheetName(), dir3Cell,
+				errors.add(new ValidationError(sheet.getName(), dir3Cell,
 						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_DIR3,
 								new String[] { dir3Cell }, LocaleContextHolder.getLocale())));
 			}
@@ -116,7 +110,7 @@ public class XlsxValidator {
 		if (!cellIsEmpty(sheet, dir3AmbitCell)) {
 			// dir3 not exists
 			if (!dir3Service.existsDir3(getCellValue(sheet, dir3AmbitCell))) {
-				errors.add(new ValidationError(sheet.getSheetName(), dir3AmbitCell,
+				errors.add(new ValidationError(sheet.getName(), dir3AmbitCell,
 						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_DIR3AMBIT,
 								new String[] { dir3AmbitCell }, LocaleContextHolder.getLocale())));
 			}
@@ -138,7 +132,7 @@ public class XlsxValidator {
 		}
 
 		if (!atLeastOneAmbit) {
-			errors.add(new ValidationError(sheet.getSheetName(),
+			errors.add(new ValidationError(sheet.getName(),
 					atLeastOneSelectedColumn + atLeastOneSelectedFirstRow + "-" + atLeastOneSelectedColumn
 							+ atLeastOneSelectedLastRow,
 					messageSource.getMessage(ValidatorConstants.VALIDATION_SHEET1_AMBIT_ATLEASTONE, null,
@@ -176,7 +170,7 @@ public class XlsxValidator {
 		}
 
 		if (!atLeastOneMandatorySelected) {
-			errors.add(new ValidationError(sheet.getSheetName(), ValidatorConstants.STRING_EMPTY,
+			errors.add(new ValidationError(sheet.getName(), ValidatorConstants.STRING_EMPTY,
 					messageSource.getMessage(ValidatorConstants.VALIDATION_SHEET1_TECHS_MANDATORY_ATLEASTONE, null,
 							LocaleContextHolder.getLocale())));
 		}
@@ -220,9 +214,8 @@ public class XlsxValidator {
 			}
 		}
 		if (!atLeastOneTechSelected) {
-			errors.add(new ValidationError(sheet.getSheetName(), ValidatorConstants.STRING_EMPTY,
-					messageSource.getMessage(ValidatorConstants.VALIDATION_SHEET1_TECHS_ATLEASTONE, null,
-							LocaleContextHolder.getLocale())));
+			errors.add(new ValidationError(sheet.getName(), ValidatorConstants.STRING_EMPTY, messageSource.getMessage(
+					ValidatorConstants.VALIDATION_SHEET1_TECHS_ATLEASTONE, null, LocaleContextHolder.getLocale())));
 		}
 
 		return errors;
@@ -258,7 +251,7 @@ public class XlsxValidator {
 				// Check C column if filled
 
 				if (cellIsEmpty(sheet, shortNameCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), shortNameCell,
+					errors.add(new ValidationError(sheet.getName(), shortNameCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_SHORTNAME,
 									new String[] { shortNameCell }, LocaleContextHolder.getLocale())));
 
@@ -267,27 +260,27 @@ public class XlsxValidator {
 				// Check D column has a valid value
 
 				if (cellIsEmpty(sheet, typeCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), typeCell,
+					errors.add(new ValidationError(sheet.getName(), typeCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_TYPE,
 									new String[] { typeCell }, LocaleContextHolder.getLocale())));
 				} else if (!Arrays.asList(ValidatorConstants.ALLOWED_PAGE_TYPES)
 						.contains(getCellValue(sheet, typeCell))) {
-					errors.add(new ValidationError(sheet.getSheetName(), typeCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_TYPE,
-									new String[] { typeCell }, LocaleContextHolder.getLocale())));
+					errors.add(new ValidationError(sheet.getName(), typeCell,
+							messageSource.getMessage("validation.cell.invalid.type", new String[] { typeCell },
+									LocaleContextHolder.getLocale())));
 				}
 
 				// Check E column is a valid URL
 
 				if (cellIsEmpty(sheet, urlCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), urlCell,
+					errors.add(new ValidationError(sheet.getName(), urlCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_URL,
 									new String[] { urlCell }, LocaleContextHolder.getLocale())));
 				} else {
 					try {
 						new URL(getCellValue(sheet, urlCell));
 					} catch (MalformedURLException e) {
-						errors.add(new ValidationError(sheet.getSheetName(), urlCell,
+						errors.add(new ValidationError(sheet.getName(), urlCell,
 								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_URL,
 										new String[] { urlCell }, LocaleContextHolder.getLocale())));
 					}
@@ -297,7 +290,7 @@ public class XlsxValidator {
 				// Check F column if filled
 
 				if (cellIsEmpty(sheet, breadcumbCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), breadcumbCell,
+					errors.add(new ValidationError(sheet.getName(), breadcumbCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_BREADCUMB,
 									new String[] { breadcumbCell }, LocaleContextHolder.getLocale())));
 
@@ -313,16 +306,16 @@ public class XlsxValidator {
 				int numberofPagesCalculated = (int) Double
 						.parseDouble(getCellValue(sheet, ValidatorConstants.SHEET_03_PAGE_COUNT_CELLREFERENCE));
 				if (numberofPagesCalculated != numPages) {
-					errors.add(new ValidationError(sheet.getSheetName(),
-							ValidatorConstants.SHEET_03_PAGE_COUNT_CELLREFERENCE,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_SAMPLE_PAGES, null,
-									LocaleContextHolder.getLocale())));
+					errors.add(
+							new ValidationError(sheet.getName(), ValidatorConstants.SHEET_03_PAGE_COUNT_CELLREFERENCE,
+									messageSource.getMessage(ValidatorConstants.VALIDATION_SAMPLE_PAGES, null,
+											LocaleContextHolder.getLocale())));
 				}
 				int numberofRandomPages = (int) Double
 						.parseDouble(getCellValue(sheet, ValidatorConstants.SHEET_03_RANDOM_PAGE_COUNT_CELLREFERENCE));
 
 				if (numberofRandomPages < (numPages / 10)) {
-					errors.add(new ValidationError(sheet.getSheetName(),
+					errors.add(new ValidationError(sheet.getName(),
 							ValidatorConstants.SHEET_03_RANDOM_PAGE_COUNT_CELLREFERENCE,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_SAMPLE_PAGES_RANDOM, null,
 									LocaleContextHolder.getLocale())));
@@ -340,10 +333,9 @@ public class XlsxValidator {
 	/**
 	 * Validate sheet principle.
 	 *
-	 * @param sheet                           the sheet
-	 * @param beginRow                        the begin row
-	 * @param endRow                          the end row
-	 * @param ValidatorConstants.RESULT_TYPES
+	 * @param sheet    the sheet
+	 * @param beginRow the begin row
+	 * @param endRow   the end row
 	 * @return the list
 	 */
 	private List<ValidationError> validateSheetPrinciple(final Sheet sheet, final int beginRow, final int endRow) {
@@ -380,14 +372,14 @@ public class XlsxValidator {
 
 				String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
-				errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+				errors.add(new ValidationError(sheet.getName(), principleTitleCell,
 						messageSource.getMessage(ValidatorConstants.VALIDATION_PRINCIPLE_LESS_PAGES,
 								new String[] { getCellValue(sheet, principleTitleCell) },
 								LocaleContextHolder.getLocale())));
 			} else if (countFilled > numPages) {
 				String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
-				errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+				errors.add(new ValidationError(sheet.getName(), principleTitleCell,
 						messageSource.getMessage(ValidatorConstants.VALIDATION_PRINCIPLE_GREATER_PAGES,
 								new String[] { getCellValue(sheet, principleTitleCell) },
 								LocaleContextHolder.getLocale())));
@@ -405,7 +397,7 @@ public class XlsxValidator {
 				// Check B column if filled
 
 				if (cellIsEmpty(sheet, pageTitleCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), pageTitleCell,
+					errors.add(new ValidationError(sheet.getName(), pageTitleCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_SHORTNAME,
 									new String[] { pageTitleCell }, LocaleContextHolder.getLocale())));
 
@@ -414,14 +406,14 @@ public class XlsxValidator {
 				// Check C column is a valid URL
 
 				if (cellIsEmpty(sheet, pageUrlCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), pageUrlCell,
+					errors.add(new ValidationError(sheet.getName(), pageUrlCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_URL,
 									new String[] { pageUrlCell }, LocaleContextHolder.getLocale())));
 				} else {
 					try {
 						new URL(getCellValue(sheet, pageUrlCell));
 					} catch (MalformedURLException e) {
-						errors.add(new ValidationError(sheet.getSheetName(), pageUrlCell,
+						errors.add(new ValidationError(sheet.getName(), pageUrlCell,
 								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_URL,
 										new String[] { pageUrlCell }, LocaleContextHolder.getLocale())));
 					}
@@ -431,18 +423,18 @@ public class XlsxValidator {
 				// Check D column if filled
 
 				if (cellIsEmpty(sheet, pageResultCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), pageResultCell,
+					errors.add(new ValidationError(sheet.getName(), pageResultCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_RESULT,
 									new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
 				} else if (!Arrays.asList(ValidatorConstants.ALLOWED_RESULT_TYPES)
 						.contains(getCellValue(sheet, pageResultCell))) {
-					errors.add(new ValidationError(sheet.getSheetName(), pageResultCell,
+					errors.add(new ValidationError(sheet.getName(), pageResultCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_RESULT,
 									new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
 				} else if (Arrays.asList(ValidatorConstants.NOT_ALLOWED_RESULT_TYPES)
 						.contains(getCellValue(sheet, pageResultCell))) {
 					// Cannot exists N/T or N/D values
-					errors.add(new ValidationError(sheet.getSheetName(), pageResultCell,
+					errors.add(new ValidationError(sheet.getName(), pageResultCell,
 							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_NOTPERMITED_RESULT,
 									new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
 				}
@@ -484,14 +476,14 @@ public class XlsxValidator {
 
 			String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
-			errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+			errors.add(new ValidationError(sheet.getName(), principleTitleCell,
 					messageSource.getMessage(ValidatorConstants.VALIDATION_PRINCIPLE_LESS_PAGES,
 							new String[] { getCellValue(sheet, principleTitleCell) },
 							LocaleContextHolder.getLocale())));
 		} else if (countFilled > numPages) {
 			String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
-			errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+			errors.add(new ValidationError(sheet.getName(), principleTitleCell,
 					messageSource.getMessage(ValidatorConstants.VALIDATION_PRINCIPLE_GREATER_PAGES,
 							new String[] { getCellValue(sheet, principleTitleCell) },
 							LocaleContextHolder.getLocale())));
@@ -519,14 +511,14 @@ public class XlsxValidator {
 
 			String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
-			errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+			errors.add(new ValidationError(sheet.getName(), principleTitleCell,
 					messageSource.getMessage(ValidatorConstants.VALIDATION_PRINCIPLE_LESS_PAGES,
 							new String[] { getCellValue(sheet, principleTitleCell) },
 							LocaleContextHolder.getLocale())));
 		} else if (countFilled > numPages) {
 			String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
-			errors.add(new ValidationError(sheet.getSheetName(), principleTitleCell,
+			errors.add(new ValidationError(sheet.getName(), principleTitleCell,
 					messageSource.getMessage(ValidatorConstants.VALIDATION_PRINCIPLE_GREATER_PAGES,
 							new String[] { getCellValue(sheet, principleTitleCell) },
 							LocaleContextHolder.getLocale())));
@@ -541,9 +533,10 @@ public class XlsxValidator {
 		for (int i = 0; i < 30; i++) {
 			int columnNumber = initColumnNumber + i;
 			CellReference cr = new CellReference(rowNumber, columnNumber);
+
 			if (ValidatorConstants.IN_REVIEW_VALUE.equalsIgnoreCase(getCellValue(sheet, cr.formatAsString()))) {
 				CellReference principle = new CellReference(principleRowNumber, columnNumber);
-				errors.add(new ValidationError(sheet.getSheetName(), cr.formatAsString(),
+				errors.add(new ValidationError(sheet.getName(), cr.formatAsString(),
 						messageSource.getMessage(ValidatorConstants.VALIDATION_RESULTS_PENDING,
 								new String[] { getCellValue(sheet, principle.formatAsString()) },
 								LocaleContextHolder.getLocale())));
@@ -561,7 +554,7 @@ public class XlsxValidator {
 			CellReference cr = new CellReference(rowNumber, columnNumber);
 			if (ValidatorConstants.IN_REVIEW_VALUE.equalsIgnoreCase(getCellValue(sheet, cr.formatAsString()))) {
 				CellReference principle = new CellReference(principleRowNumber, columnNumber);
-				errors.add(new ValidationError(sheet.getSheetName(), cr.formatAsString(),
+				errors.add(new ValidationError(sheet.getName(), cr.formatAsString(),
 						messageSource.getMessage(ValidatorConstants.VALIDATION_RESULTS_PENDING,
 								new String[] { getCellValue(sheet, principle.formatAsString()) },
 								LocaleContextHolder.getLocale())));
@@ -583,7 +576,7 @@ public class XlsxValidator {
 				if (Arrays.asList(ValidatorConstants.NOT_ALLOWED_RESULT_TYPES)
 						.contains(getCellValue(sheet, cr.formatAsString()))) {
 					CellReference principle = new CellReference(principleRowNumber, columnNumber);
-					errors.add(new ValidationError(sheet.getSheetName(), cr.formatAsString(),
+					errors.add(new ValidationError(sheet.getName(), cr.formatAsString(),
 							messageSource.getMessage(
 									ValidatorConstants.VALIDATION_RESULTS_NOTALLOWED, new String[] {
 											getCellValue(sheet, principle.formatAsString()), cr.formatAsString() },
@@ -606,7 +599,7 @@ public class XlsxValidator {
 				if (Arrays.asList(ValidatorConstants.NOT_ALLOWED_RESULT_TYPES)
 						.contains(getCellValue(sheet, cr.formatAsString()))) {
 					CellReference principle = new CellReference(principleRowNumber, columnNumber);
-					errors.add(new ValidationError(sheet.getSheetName(), cr.formatAsString(),
+					errors.add(new ValidationError(sheet.getName(), cr.formatAsString(),
 							messageSource.getMessage(
 									ValidatorConstants.VALIDATION_RESULTS_NOTALLOWED, new String[] {
 											getCellValue(sheet, principle.formatAsString()), cr.formatAsString() },
@@ -626,29 +619,13 @@ public class XlsxValidator {
 	 * @return the cell value
 	 */
 	private String getCellValue(final Sheet sheet, final String cellReference) {
-		CellReference ref = new CellReference(cellReference);
-		Row r = sheet.getRow(ref.getRow());
-		Cell c = r.getCell(ref.getCol());
-		if (c == null || CellType.BLANK.equals(c.getCellType())) {
+
+		MutableCell<SpreadSheet> c = sheet.getCellAt(cellReference);
+
+		if (c == null) {
 			return ValidatorConstants.STRING_EMPTY;
-		} else if (CellType.STRING.equals(c.getCellType())) {
-			return c.getStringCellValue();
-		} else if (CellType.NUMERIC.equals(c.getCellType())) {
-			return String.valueOf(c.getNumericCellValue());
-		} else if (CellType.BOOLEAN.equals(c.getCellType())) {
-			return String.valueOf(c.getBooleanCellValue());
-		} else if (CellType.FORMULA.equals(c.getCellType())) {
-
-			if (CellType.STRING.equals(evaluator.evaluateFormulaCell(c))) {
-				return c.getStringCellValue();
-			} else if (CellType.NUMERIC.equals(evaluator.evaluateFormulaCell(c))) {
-				return String.valueOf(c.getNumericCellValue());
-			} else {
-				return ValidatorConstants.STRING_EMPTY;
-			}
-
 		} else {
-			return ValidatorConstants.STRING_EMPTY;
+			return c.getTextValue();
 		}
 
 	}
@@ -662,11 +639,8 @@ public class XlsxValidator {
 	 */
 	private boolean cellIsEmpty(final Sheet sheet, final String cellReference) {
 
-		CellReference ref = new CellReference(cellReference);
-		Row r = sheet.getRow(ref.getRow());
-		Cell c = r.getCell(ref.getCol());
-		if (c == null || CellType.BLANK.equals(c.getCellType())
-				|| (CellType.STRING.equals(c.getCellType()) && StringUtils.isEmpty(c.getStringCellValue()))) {
+		MutableCell<SpreadSheet> c = sheet.getCellAt(cellReference);
+		if (c == null || StringUtils.isEmpty(c.getTextValue())) {
 			return true;
 		}
 
