@@ -7,14 +7,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import es.oaw.irapvalidator.storage.StorageService;
-import es.oaw.irapvalidator.storage.StorageProperties;
 
 
 /**
  * The Class IrapvalidatorApplication.
  */
 @SpringBootApplication
-@EnableConfigurationProperties(StorageProperties.class)
 public class IrapvalidatorApplication {
 
 	/**
@@ -39,14 +37,4 @@ public class IrapvalidatorApplication {
 		multipartResolver.setPreserveFilename(true);
 		return multipartResolver;
 	}
-
-
-	@Bean
-	CommandLineRunner init(StorageService storageService) {
-		return (args) -> {
-			storageService.deleteAll();
-			storageService.init();
-		};
-	}
-
 }

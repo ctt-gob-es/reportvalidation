@@ -1,18 +1,18 @@
 package es.oaw.irapvalidator.controller;
 
 import es.oaw.irapvalidator.Constants;
-import es.oaw.irapvalidator.storage.StorageFileNotFoundException;
-import es.oaw.irapvalidator.storage.StorageService;
+import es.oaw.irapvalidator.model.ResponseValidatedFile;
+import es.oaw.irapvalidator.model.ValidatedFile;
+import es.oaw.irapvalidator.storage.FileDbStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,19 +24,34 @@ import java.util.stream.Collectors;
 @RequestMapping(path = Constants.UPLOAD_CONTROLLER_PATH)
 public class FileUploadController {
 
-	private final StorageService storageService;
-
 	@Autowired
-	public FileUploadController(StorageService storageService) {
-		this.storageService = storageService;
-	}
+	private FileDbStorageService storageService;
+
 
 	@GetMapping("/")
 	public String listUploadedFiles(Model model) throws IOException {
+		List<ResponseValidatedFile> files = storageService.getAllFiles().map(dbFile -> {
+			String fileDownloadUri = ServletUriComponentsBuilder
+					.fromCurrentContextPath()
+					.path("/files/")
+					.path(dbFile.getId())
+					.toUriString();
+
+			ResponseValidatedFile fileResponse = new ResponseValidatedFile(
+					dbFile.getName(),
+					fileDownloadUri,
+					dbFile.getType(),
+					dbFile.getData().length);
+
+			return fileResponse;
+		}).collect(Collectors.toList());
+
+/**
 		List<String> files = storageService.loadAll().map(
 				path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
 						"serveFile", path.getFileName().toString()).build().toUri().toString())
 				.collect(Collectors.toList());
+ */
 		model.addAttribute("files", files);
 
 		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_FORM);
@@ -45,11 +60,12 @@ public class FileUploadController {
 
 	@GetMapping("/{filename:.+}")
 	@ResponseBody
-	public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+	public ResponseEntity<byte[]> serveFile(@PathVariable String filename) {
+		ValidatedFile file = storageService.getFile(filename);
 
-		Resource file = storageService.loadAsResource(filename);
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-				"attachment; filename=\"" + file.getFilename() + "\"").body(file);
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+				.body(file.getData());
 	}
 
 	@PostMapping("/")
@@ -60,30 +76,30 @@ public class FileUploadController {
 		List<String> validFiles = new ArrayList<>();
 		List<ErrorInfo> invalidFiles = new ArrayList<>();
 
-		if (!empty){
-			for (MultipartFile file : files){
-				ErrorInfo errors = validate(file, valid);
-				if (errors.getErrors().size() != 0){
-					invalidFiles.add(errors);
-				}
-				else{
-					validFiles.add(file.getOriginalFilename());
-					storageService.store(file);
-				}
+		try {
 
-				valid = !valid;
+			if (!empty){
+				for (MultipartFile file : files){
+					ErrorInfo errors = validate(file, valid);
+					if (errors.getErrors().size() != 0){
+						invalidFiles.add(errors);
+					}
+					else{
+						validFiles.add(file.getOriginalFilename());
+						storageService.store(file);
+					}
+
+					valid = !valid;
+				}
 			}
+		}
+		catch (Exception ignored){
 		}
 
 		model.addAttribute("valid", validFiles );
 		model.addAttribute("invalid", invalidFiles );
 		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_SUMMARY);
 		return Constants.TEMPLATE_LOGGED_IN;	}
-
-	@ExceptionHandler(StorageFileNotFoundException.class)
-	public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-		return ResponseEntity.notFound().build();
-	}
 
 	/***
 	 * Temporary until proper validation is implemented
