@@ -1,0 +1,19 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: irapvalidator
+      MYSQL_USER: iarp
+      MYSQL_PASSWORD: iarp
+    ports:
+      - 3306:3306
+    volumes:
+      - ./docker/mysql/volumes:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 3307:8080

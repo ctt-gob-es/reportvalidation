@@ -9,13 +9,27 @@
 	</form>
 
 	<h4>Ficheros almacenados:</h4>
-	<div>
-		<ul>
-			<li th:each="file : ${files}">
-				<a th:href="${file}" th:text="${file}" />
-			</li>
-		</ul>
-	</div>
+	<table>
+		<thead>
+		<tr>
+			<th> Nombre </th>
+			<th> URL </th>
+			<th> Tipo </th>
+			<th> Tamaño </th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr th:if="${files.empty}">
+			<td colspan="4"> No hay ficheros </td>
+		</tr>
+		<tr th:each="file : ${files}">
+			<td><span th:text="${file.name}"> Nombre </span></td>
+			<td><a th:href="${file.url}" th:text="link" /></td>
+			<td><span th:text="${file.type}"> Tipo </span></td>
+			<td><span th:text="${file.size}"> Tamaño </span></td>
+		</tr>
+		</tbody>
+	</table>
 
 	<div th:if="${message}">
 		<h4 th:text="${message}"/>
