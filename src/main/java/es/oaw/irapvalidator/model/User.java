@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -30,7 +29,7 @@ public class User implements Serializable {
 
 	/** The id usuario. */
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue
 	private Integer id;
 
 	/** The activo. */
@@ -45,6 +44,20 @@ public class User implements Serializable {
 	@NotNull(message = "{field.required}")
 	@NotEmpty(message = "{field.required}")
 	private String password;
+
+	/** The nombre. */
+	@NotNull(message = "{field.required}")
+	@NotEmpty(message = "{field.required}")
+	private String name;
+
+	/** The apellidos. */
+	private String surname;
+	
+	/** The email. */
+	private String email;
+	
+	/** The ura. */
+	private String ura;
 
 	/** The rols. */
 	// bi-directional many-to-many association to Rol
@@ -141,6 +154,78 @@ public class User implements Serializable {
 	 */
 	public void setRoles(List<Role> roles) {
 		this.roles = roles;
+	}
+
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Sets the name.
+	 *
+	 * @param name the new name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Gets the surname.
+	 *
+	 * @return the surname
+	 */
+	public String getSurname() {
+		return surname;
+	}
+
+	/**
+	 * Sets the surname.
+	 *
+	 * @param surname the new surname
+	 */
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+
+	/**
+	 * Gets the email.
+	 *
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * Sets the email.
+	 *
+	 * @param email the new email
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	/**
+	 * Gets the ura.
+	 *
+	 * @return the ura
+	 */
+	public String getUra() {
+		return ura;
+	}
+
+	/**
+	 * Sets the ura.
+	 *
+	 * @param ura the new ura
+	 */
+	public void setUra(String ura) {
+		this.ura = ura;
 	}
 
 }

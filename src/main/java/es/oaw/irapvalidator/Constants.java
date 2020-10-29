@@ -15,4 +15,9 @@ public final class Constants {
 	public static final String FRAGMENT_UPLOAD_TABLE = "uploadTable";
 	public static final String FRAGMENT_UPLOAD_SUMMARY = "uploadSummary";
 
+	/** The Constant ASC. */
+	public static final String ASC = "asc";
+	/** The Constant MODEL_KEY_CONTENT. */
+	public static final String MODEL_KEY_CONTENT = "content";
+
 }

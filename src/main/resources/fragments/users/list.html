@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http:/www.thymeleaf.org">
+<div th:fragment="content">
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		$(document)
+				.ready(
+
+						function(data) {
+							table = $('#usersTable')
+									.DataTable(
+											{
+												language : {
+													"url" : "/js/datatables.spanish.json"
+												},
+												processing : true,
+												serverSide : true,
+												searching : false,
+
+												ajax : {
+													url : "/users/all",
+													dataSrc : "content",
+													"type" : "POST",
+													"contentType" : "application/json; charset=utf-8",
+													"data" : function(d) {
+														return JSON
+																.stringify(d);
+													}
+												},
+												columns : [
+
+														{
+															data : "name",
+															title : "Nombre"
+														},
+														{
+															data : "surname",
+															title : "Apellidos"
+														},
+														{
+															data : "username",
+															title : "Usuario"
+														},
+														{
+															data : "email",
+															title : "Correo electrónico"
+														},
+														{
+															data : "ura",
+															title : "Unidad Responsable de Accesibilidad (URA)"
+														},
+														{
+															data : "active",
+															title : "Activo",
+															   render: function(
+										                                data,
+										                                type,
+										                                row) {
+																   
+																   if(data ==1){
+																	   return "Sí";
+																   }
+																   
+																   return "No";
+															   }
+														},
+														{
+															data : "roles",
+															title : "Roles",
+								                            render: function(
+									                                data,
+									                                type,
+									                                row) {
+									                                var roles = "";
+									                                data.forEach((item) => {
+									                                    if (item) {
+									                                    	roles += item.name + "<br/>";
+									                                    }
+									                                });
+
+									                                return roles;
+									                            }
+														},
+														
+														{
+															data : null,
+															title : "",
+															orderable : false,
+															targets : 0,
+															render : function(
+																	data, type,
+																	row) {
+												        		var editButton = '<a href="users/edit/' + row.id + '" class="mr-1 mt-1 btn btn-primary d-inline btn-sm float-left"><span><i class="fa fa-edit"></i><span>' + [[#{button.edit}]] + '</span></span></a>';
+						                            			var deleteButton = '<a href="#" onclick="deleteUser(' + row.id +')" class="mr-1 mt-1 btn btn-danger d-inline btn-sm float-left"><span><i class="fa fa-trash"></i><span>' + [[#{button.remove}]] + '</span></span></a>';
+						                            			var deactivateButton = '<a href="#" onclick="deactivate(' + row.id +')" class="mr-1 mt-1 btn btn-warning d-inline btn-sm float-left"><span><i class="fa fa-times-circle"></i><span>' + [[#{button.deactivate}]] + '</span></span></a>';
+						                            			var activateButton = '<a href="#" onclick="activate(' + row.id +')" class="mr-1 mt-1 btn btn-info d-inline btn-sm float-left"><span><i class="fa fa-check-circle"></i><span>' + [[#{button.activate}]] + '</span></span></a>';
+						                            	
+						                            			
+						                            			if(row.id!=1){
+						                            				if(row.active == 1){
+						                            					return editButton + deleteButton + deactivateButton;	
+						                            				} else {
+						                            					return editButton + deleteButton + activateButton;
+						                            				}
+						                            					
+						                            			}
+						                            			
+						                            			return editButton;
+						                            			
+															}
+														}
+
+												]
+											});
+						});
+
+		function deleteUser(id) {
+			$("#deleteUsuarioDialogConfirm").click(function(){window.location.replace("/users/delete/" + id); });
+			$('#deleteUsuarioDialog').modal('toggle');
+		};
+		
+		function deactivate(id) {
+			$("#deactivateUsuarioDialogConfirm").click(function(){window.location.replace("/users/deactivate/" + id); });
+			$('#deactivateUsuarioDialog').modal('toggle');
+		};
+		
+		function activate(id) {
+			$("#activateUsuarioDialogConfirm").click(function(){window.location.replace("/users/activate/" + id); });
+			$('#activateUsuarioDialog').modal('toggle');
+		};
+		
+		/*]]>*/
+		</script>
+
+
+	<div th:switch="${recursos}">
+
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/"
+					th:text="#{breadcrumb.home}"></a></li>
+				<li class="breadcrumb-item" th:text="#{breadcrumb.admin}"></li>
+				<li class="breadcrumb-item active" aria-current="page"
+					th:text="#{breadcrumb.users}"></li>
+			</ol>
+		</nav>
+
+		<div class="container-fluid">
+			<div class="alert alert-danger alert-dismissible fade show"
+				role="alert" th:if="${error}">
+				<span th:text="${error}"></span>
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="alert alert-success alert-dismissible fade show"
+				role="alert" th:if="${success}">
+				<span th:text="${success}"></span>
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="container-fluid">
+			<div class="card">
+				<div class="card-header p-2">
+
+					<div class="col-sm-9 float-left">
+						<h4 th:text="#{users.table.title}"></h4>
+					</div>
+					<div class="col-sm-3 float-right text-right">
+						<a class="btn btn-success" th:href="@{/users/create}"><i
+							class="fas fa-plus-square"></i><span
+							th:text="#{users.button.add}"></span></a>
+					</div>
+
+				</div>
+				<div class="card-body p-0">
+					<table id="usersTable" class="display" style="width: 100%"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Modal confirm delete -->
+	<div class="modal fade" id="deleteUsuarioDialog" tabindex="-1"
+		role="dialog" aria-labelledby="deleteUsuarioDialogLabel"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deleteUsuarioDialogLabel"
+						th:text="#{breadcrumb.user.delete}"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p th:text=#{detele.user.confirm.message}></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary"
+						th:text="#{button.ok}" id="deleteUsuarioDialogConfirm"></button>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal" th:text="#{button.cancel}"></button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal deactivate  -->
+	<div class="modal fade" id="deactivateUsuarioDialog" tabindex="-1"
+		role="dialog" aria-labelledby="deactivateUsuarioDialogLabel"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deactivateUsuarioDialogLabel"
+						th:text="#{breadcrumb.user.deactivate}"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p th:text=#{deactivate.user.confirm.message}></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary"
+						th:text="#{button.ok}" id="deactivateUsuarioDialogConfirm"></button>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal" th:text="#{button.cancel}"></button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Modal activate  -->
+	<div class="modal fade" id="activateUsuarioDialog" tabindex="-1"
+		role="dialog" aria-labelledby="activateUsuarioDialogLabel"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="deactivateUsuarioDialogLabel"
+						th:text="#{breadcrumb.user.activate}"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p th:text=#{activate.user.confirm.message}></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary"
+						th:text="#{button.ok}" id="activateUsuarioDialogConfirm"></button>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal" th:text="#{button.cancel}"></button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+</div>
