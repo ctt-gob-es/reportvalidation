@@ -3,54 +3,53 @@ package es.oaw.irapvalidator.model;
 import java.io.Serializable;
 import javax.persistence.*;
 
-
 /**
  * The persistent class for the dir3 database table.
  * 
  */
 @Entity
-@Table(name="dir3")
-@NamedQuery(name="Dir3.findAll", query="SELECT d FROM Dir3 d")
+@Table(name = "dir3")
+@NamedQuery(name = "Dir3.findAll", query = "SELECT d FROM Dir3 d")
 public class Dir3 implements Serializable {
-	
+
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
 	/** The c id ud organica. */
 	@Id
-	@Column(name="C_ID_UD_ORGANICA")
+	@Column(name = "C_ID_UD_ORGANICA")
 	private String cIdUdOrganica;
 
 	/** The c desc prov. */
-	@Column(name="C_DESC_PROV")
+	@Column(name = "C_DESC_PROV")
 	private String cDescProv;
 
 	/** The c dnm ud organica. */
-	@Column(name="C_DNM_UD_ORGANICA")
+	@Column(name = "C_DNM_UD_ORGANICA")
 	private String cDnmUdOrganica;
 
 	/** The c dnm ud organica principalc id ud organica. */
-	@Column(name="C_DNM_UD_ORGANICA_PRINCIPALC_ID_UD_ORGANICA")
+	@Column(name = "C_DNM_UD_ORGANICA_PRINCIPALC_ID_UD_ORGANICA")
 	private String cDnmUdOrganicaPrincipalcIdUdOrganica;
 
 	/** The c dnm ud organica superior. */
-	@Column(name="C_DNM_UD_ORGANICA_SUPERIOR")
+	@Column(name = "C_DNM_UD_ORGANICA_SUPERIOR")
 	private String cDnmUdOrganicaSuperior;
 
 	/** The c id amb provincia. */
-	@Column(name="C_ID_AMB_PROVINCIA")
+	@Column(name = "C_ID_AMB_PROVINCIA")
 	private String cIdAmbProvincia;
 
 	/** The c id dep ud principal. */
-	@Column(name="C_ID_DEP_UD_PRINCIPAL")
+	@Column(name = "C_ID_DEP_UD_PRINCIPAL")
 	private String cIdDepUdPrincipal;
 
 	/** The c id dep ud superior. */
-	@Column(name="C_ID_DEP_UD_SUPERIOR")
+	@Column(name = "C_ID_DEP_UD_SUPERIOR")
 	private String cIdDepUdSuperior;
 
 	/** The c id nivel admon. */
-	@Column(name="C_ID_NIVEL_ADMON")
+	@Column(name = "C_ID_NIVEL_ADMON")
 	private int cIdNivelAdmon;
 
 	/**
@@ -125,7 +124,8 @@ public class Dir3 implements Serializable {
 	/**
 	 * Sets the c dnm ud organica principalc id ud organica.
 	 *
-	 * @param cDnmUdOrganicaPrincipalcIdUdOrganica the new c dnm ud organica principalc id ud organica
+	 * @param cDnmUdOrganicaPrincipalcIdUdOrganica the new c dnm ud organica
+	 *                                             principalc id ud organica
 	 */
 	public void setCDnmUdOrganicaPrincipalcIdUdOrganica(String cDnmUdOrganicaPrincipalcIdUdOrganica) {
 		this.cDnmUdOrganicaPrincipalcIdUdOrganica = cDnmUdOrganicaPrincipalcIdUdOrganica;

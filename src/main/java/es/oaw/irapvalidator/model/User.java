@@ -52,10 +52,10 @@ public class User implements Serializable {
 
 	/** The apellidos. */
 	private String surname;
-	
+
 	/** The email. */
 	private String email;
-	
+
 	/** The ura. */
 	private String ura;
 

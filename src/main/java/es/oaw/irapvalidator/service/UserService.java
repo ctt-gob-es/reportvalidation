@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 import es.oaw.irapvalidator.Constants;
 import es.oaw.irapvalidator.datatable.DatatablePage;
 import es.oaw.irapvalidator.datatable.DatatablePagination;
-import es.oaw.irapvalidator.filter.Filter;
 import es.oaw.irapvalidator.model.User;
 import es.oaw.irapvalidator.repository.RoleRepository;
 import es.oaw.irapvalidator.repository.UserRepository;

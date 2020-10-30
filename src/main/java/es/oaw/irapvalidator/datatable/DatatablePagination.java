@@ -8,16 +8,16 @@ import es.oaw.irapvalidator.filter.Filter;
  * The Class DatatablePagination.
  */
 public class DatatablePagination {
-	
+
 	/** The ie. */
 	private int ie = 0;
-	
+
 	/** The query. */
 	private String query;
-	
+
 	/** The all. */
 	private String all;
-	
+
 	/** The filter. */
 	private Filter filter;
 	/**
@@ -52,10 +52,10 @@ public class DatatablePagination {
 	 * Column's ordering criteria.
 	 */
 	private List<DatatableOrder> order;
-	
+
 	/** The selected. */
 	private List<String> selected;
-	
+
 	/**
 	 * Excluded concesions ids.
 	 */

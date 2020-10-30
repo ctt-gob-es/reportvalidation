@@ -1,6 +1,5 @@
 package es.oaw.irapvalidator.datatable;
 
-
 /**
  * The Class Order.
  */

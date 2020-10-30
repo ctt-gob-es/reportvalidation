@@ -6,15 +6,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
- * Filter Clase abstracta para implementar los filtos de búsqueda en elos
- * formularios. Se especifica la clase hija a la que se mapea el json con la
- * anotación jsonsubtyles. En el json se indica en la propiedad type el valor
- * para que se escoja el objeto al que va el json recibido
+ * Filter Abstract class to implement search filters in the forms. Specify the
+ * child class to which the json is mapped with the {@link JsonSubTypes}
+ * annotation. In the json is indicated in the property type the value to choose
+ * the object to which the json received goes
  */
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type")
 @JsonSubTypes({ @JsonSubTypes.Type(value = UserFilter.class, name = "userFilter"),
-		@JsonSubTypes.Type(value = FileFilter.class, name = "fileFilter"),
-		 })
+		@JsonSubTypes.Type(value = FileFilter.class, name = "fileFilter"), })
 public abstract class Filter {
 
 }

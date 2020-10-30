@@ -28,7 +28,8 @@ public class DatatableColumn {
 	 * Search criteria to apply to this specific column.
 	 */
 	private DatableSearch search;
-	
+
+	/** The visible. */
 	private boolean visible;
 
 	/**
@@ -122,6 +123,8 @@ public class DatatableColumn {
 	}
 
 	/**
+	 * Checks if is visible.
+	 *
 	 * @return the visible
 	 */
 	public boolean isVisible() {
@@ -129,6 +132,8 @@ public class DatatableColumn {
 	}
 
 	/**
+	 * Sets the visible.
+	 *
 	 * @param visible the visible to set
 	 */
 	public void setVisible(boolean visible) {

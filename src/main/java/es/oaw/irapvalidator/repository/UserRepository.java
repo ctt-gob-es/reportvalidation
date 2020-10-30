@@ -7,6 +7,6 @@ import es.oaw.irapvalidator.model.User;
 /**
  * The Interface UserRepository.
  */
-public interface UserRepository  extends JpaRepository <User, Integer>{
-	
+public interface UserRepository extends JpaRepository<User, Integer> {
+
 }

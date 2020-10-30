@@ -3,40 +3,40 @@ package es.oaw.irapvalidator.filter;
 import java.io.Serializable;
 
 /**
- * Filter to Concesion search.
+ * The Class FileFilter.
  * 
- * This class is used to pass filter fields from view.
- * 
- * Every field on form has an {@link FilterField} implementacion asigned. The
- * value name of filterfield is setting on setter to prevent override name of field thas is the path to de field of search in the entity.
- * 
+ * Every field on form has an {@link FilterField} implementation assigned. The
+ * value name of filterfield is setting on setter to prevent override name of
+ * field thats is the path to the field of search in the entity.
  */
 public class FileFilter extends Filter implements Serializable {
 
-	/**
-	 * 
-	 */
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
-	/** The Constant FIELDNAME_NOMBRE. */
-	private static final String FIELDNAME_NOMBRE = "nombre";
-	
-	/** The nombre. */
-	private FilterGenericField nombre;
+	/** The Constant FIELDNAME_NAME. */
+	private static final String FIELDNAME_NAME = "name";
+
+	/** The name. */
+	private FilterGenericField name;
 
 	/**
-	 * @return the nombre
+	 * Gets the name.
+	 *
+	 * @return the name
 	 */
-	public FilterGenericField getNombre() {
-		return nombre;
+	public FilterGenericField getName() {
+		return name;
 	}
 
 	/**
-	 * @param nombre the nombre to set
+	 * Sets the name.
+	 *
+	 * @param name the new name
 	 */
-	public void setNombre(FilterGenericField nombre) {
-		nombre.setName(FIELDNAME_NOMBRE);
-		this.nombre = nombre;
+	public void setName(FilterGenericField name) {
+		name.setName(FIELDNAME_NAME);
+		this.name = name;
 	}
 
 }

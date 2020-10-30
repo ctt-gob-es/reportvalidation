@@ -8,7 +8,7 @@ import java.util.List;
 public class DatatablePage {
 
 	/** The content. */
-	private List content;
+	private List<?> content;
 
 	/** The records total. */
 	private Long recordsTotal;
@@ -21,7 +21,7 @@ public class DatatablePage {
 	 *
 	 * @return the content
 	 */
-	public List getContent() {
+	public List<?> getContent() {
 		return content;
 	}
 
@@ -30,7 +30,7 @@ public class DatatablePage {
 	 *
 	 * @param content the content to set
 	 */
-	public void setContent(List content) {
+	public void setContent(List<?> content) {
 		this.content = content;
 	}
 

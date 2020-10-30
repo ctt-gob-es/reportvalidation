@@ -21,7 +21,6 @@ public class IndexController {
 	/**
 	 * Index.
 	 *
-	 * @param concession the concession
 	 * @param model      the model
 	 * @param session    the session
 	 * @return the string
