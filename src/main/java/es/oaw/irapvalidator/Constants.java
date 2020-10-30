@@ -8,13 +8,11 @@ public final class Constants {
 	/** The Constant TEMPLATE_LOGGED_IN. */
 	public static final String TEMPLATE_LOGGED_IN = "templateLoggedIn";
 
-	/** The Constant UPLOAD_CONTROLLER_PATH. */
+	public static final String TEMPLATE_DRAG_UPLOAD = "templateDrag";
+
 	public static final String UPLOAD_CONTROLLER_PATH = "/files";
 
-	/** The Constant FRAGMENT_UPLOAD_FORM. */
-	public static final String FRAGMENT_UPLOAD_FORM = "uploadForm";
-
-	/** The Constant FRAGMENT_UPLOAD_SUMMARY. */
+	public static final String FRAGMENT_UPLOAD_TABLE = "uploadTable";
 	public static final String FRAGMENT_UPLOAD_SUMMARY = "uploadSummary";
 
 	/** The Constant ASC. */

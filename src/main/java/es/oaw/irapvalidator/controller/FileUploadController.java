@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -46,16 +48,9 @@ public class FileUploadController {
 			return fileResponse;
 		}).collect(Collectors.toList());
 
-/**
-		List<String> files = storageService.loadAll().map(
-				path -> MvcUriComponentsBuilder.fromMethodName(FileUploadController.class,
-						"serveFile", path.getFileName().toString()).build().toUri().toString())
-				.collect(Collectors.toList());
- */
 		model.addAttribute("files", files);
-
-		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_FORM);
-		return Constants.TEMPLATE_LOGGED_IN;
+		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_TABLE);
+		return Constants.TEMPLATE_DRAG_UPLOAD;
 	}
 
 	@GetMapping("/{filename:.+}")
@@ -69,37 +64,36 @@ public class FileUploadController {
 	}
 
 	@PostMapping("/")
-	public String handleFileUpload(@RequestParam("files") MultipartFile[] files,
-			RedirectAttributes redirectAttributes, Model model) {
+	public String handleFileUpload(MultipartHttpServletRequest request,
+								   RedirectAttributes redirectAttributes, Model model) {
+
+		Map<String, MultipartFile> fileMap = request.getFileMap();
 		boolean valid = true;
-		boolean empty = Arrays.stream(files).allMatch(MultipartFile::isEmpty);
 		List<String> validFiles = new ArrayList<>();
 		List<ErrorInfo> invalidFiles = new ArrayList<>();
 
-		try {
-
-			if (!empty){
-				for (MultipartFile file : files){
-					ErrorInfo errors = validate(file, valid);
-					if (errors.getErrors().size() != 0){
-						invalidFiles.add(errors);
-					}
-					else{
-						validFiles.add(file.getOriginalFilename());
-						storageService.store(file);
-					}
-
-					valid = !valid;
+		for (MultipartFile file : fileMap.values()) {
+			try {
+				ErrorInfo errors = validate(file, valid);
+				if (errors.getErrors().size() != 0){
+					invalidFiles.add(errors);
 				}
+				else{
+					validFiles.add(file.getOriginalFilename());
+					storageService.store(file);
+				}
+
+				valid = !valid;
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		}
-		catch (Exception ignored){
 		}
 
 		model.addAttribute("valid", validFiles );
 		model.addAttribute("invalid", invalidFiles );
 		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_SUMMARY);
-		return Constants.TEMPLATE_LOGGED_IN;	}
+		return Constants.TEMPLATE_LOGGED_IN;
+	}
 
 	/***
 	 * Temporary until proper validation is implemented
