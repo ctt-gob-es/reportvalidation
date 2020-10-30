@@ -4,6 +4,11 @@ import es.oaw.irapvalidator.Constants;
 import es.oaw.irapvalidator.model.ResponseValidatedFile;
 import es.oaw.irapvalidator.model.ValidatedFile;
 import es.oaw.irapvalidator.storage.FileDbStorageService;
+import es.oaw.irapvalidator.validator.OdsValidator;
+import es.oaw.irapvalidator.validator.ValidationError;
+import es.oaw.irapvalidator.validator.XlsxValidator;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +20,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +37,13 @@ public class FileUploadController {
 	@Autowired
 	private FileDbStorageService storageService;
 
+	@Autowired
+	private OdsValidator odsValidator;
+
+	@Autowired
+	private XlsxValidator xlsxValidator;
+
+	String TMP_PATH = "src/main/resources/targetFile.tmp";
 
 	@GetMapping("/")
 	public String listUploadedFiles(Model model) throws IOException {
@@ -68,22 +83,46 @@ public class FileUploadController {
 								   RedirectAttributes redirectAttributes, Model model) {
 
 		Map<String, MultipartFile> fileMap = request.getFileMap();
-		boolean valid = true;
 		List<String> validFiles = new ArrayList<>();
 		List<ErrorInfo> invalidFiles = new ArrayList<>();
 
 		for (MultipartFile file : fileMap.values()) {
 			try {
-				ErrorInfo errors = validate(file, valid);
-				if (errors.getErrors().size() != 0){
-					invalidFiles.add(errors);
+				String filename = file.getOriginalFilename();
+				String ext = filename.substring(filename.lastIndexOf(".") + 1);
+				List<ValidationError> errors = new ArrayList<>();
+
+				switch (ext){
+					case "ods":
+
+						try {
+							//we need to write the file to disk in order to read it as ods...
+							InputStream inputStream = file.getInputStream();
+							byte[] buffer = new byte[inputStream.available()];
+							inputStream.read(buffer);
+							File targetFile = new File(TMP_PATH);
+							OutputStream outStream = new FileOutputStream(targetFile);
+							outStream.write(buffer);
+							final SpreadSheet spreadSheet = SpreadSheet.createFromFile(targetFile);
+							errors = odsValidator.validate(spreadSheet);
+							targetFile.delete();
+						} catch (Exception e) {
+							throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
+						}
+						break;
+					case "xlsx":
+						XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+						errors = xlsxValidator.validate(workbook);
+						break;
+				}
+
+				if (errors.size() != 0){
+					invalidFiles.add(new ErrorInfo(filename, errors));
 				}
 				else{
 					validFiles.add(file.getOriginalFilename());
 					storageService.store(file);
 				}
-
-				valid = !valid;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -101,29 +140,15 @@ public class FileUploadController {
 	public static class ErrorInfo
 	{
 		private final String filename;
-		private final List<String> errors;
+		private final List<ValidationError> errors;
 
-		public ErrorInfo(String filename, List<String> errors)
+		public ErrorInfo(String filename, List<ValidationError> errors)
 		{
 			this.filename = filename;
 			this.errors = errors;
 		}
 
 		public String getFilename()   { return this.filename; }
-		public List<String> getErrors() { return this.errors; }
-		public void addError(String error){this.errors.add(error); }
+		public List<ValidationError> getErrors() { return this.errors; }
 	}
-
-	/***
-	 * Temporary until proper validation is implemented
-	 */
-	private ErrorInfo validate(MultipartFile file, boolean valid){
-		ErrorInfo errors = new ErrorInfo(file.getOriginalFilename(), new ArrayList<>());
-		if (!valid){
-			errors.addError("Error1");
-			errors.addError("Error2");
-		}
-		return errors;
-	}
-
 }

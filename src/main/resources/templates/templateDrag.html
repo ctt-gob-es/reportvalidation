@@ -22,6 +22,8 @@
 				var dropzoneOptions = {
 					dictDefaultMessage: "Arrastre ficheros validación...",
 					paramName: "files",
+					acceptedFiles: '.xlsx, .ods',
+					addRemoveLinks: true,
 					maxFilesize: 3.0,
 					maxFiles: 10,
 					parallelUploads: 10,
@@ -41,8 +43,7 @@
 				$("#btnUpload").on("click", function () {
 					newDropzone.processQueue();
 				});
-
-				console.log("Loaded");
+				console.log("Dropzone configured");
 			};
 
 		</script>
