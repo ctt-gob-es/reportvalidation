@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org">
+<head th:include="../fragments/header :: header"></head>
 
 <body>
+	<div th:include="../fragments/navbar :: navbarWithoutMenu"></div>
 	<div class="container catmin-login-form">
 
 		<form th:action="@{/login}" method="POST" class="form-signin">
@@ -19,5 +21,7 @@
 				value="Login" type="Submit" th:text="#{login.button}"></button>
 		</form>
 	</div>
+	<div th:include="../fragments/footer :: footer"></div>
+
 </body>
 </html>
