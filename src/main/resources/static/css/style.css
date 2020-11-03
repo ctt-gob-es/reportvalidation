@@ -1,17 +1,5 @@
 @charset "UTF-8";
 
-.input-group-titular, .input-group-explotador{
-	flex: 1 1 auto;
-    display: flex;
-    clear: both;
-}
-
-.input-group-titular:nth-child(n+3), .input-group-explotador:nth-child(n+3) {
-    float: left;
-    clear: both;
-    width: 100%;
-        margin-top: 5px;
-}
 
 .borderless {
 	border:none !important;
@@ -201,36 +189,13 @@ background: #4cd964 !important;
 left: 33px !important;
 }
 
-#concessionsTable, #ieTable {
-	margin-top: 5px !important;
-    float: left;
-    font-size: 12pt;
-}
 
 .dt-buttons {
 	padding-left: 5px;
 }
 
-#concessionsTable_wrapper > div.dt-buttons > button:nth-child(7),
-#ieTable_wrapper > div.dt-buttons > button:nth-child(4){
-	clear:left !important;
-	
-} 
 
 
-#concessionsTable_wrapper > div.dt-buttons > button:nth-child(6),
-#concessionsTable_wrapper > div.dt-buttons > button:nth-child(22),
-#ieTable_wrapper > div.dt-buttons > button:nth-child(3),
-#ieTable_wrapper > div.dt-buttons > button:nth-child(12){
-	display: none;
-}
-
-#concessionsTable_wrapper > div.dt-buttons > button,
-#ieTable_wrapper > div.dt-buttons > button {
-	margin-top: 5px;
-	float:left;
-	margin-right: 5px !important;
-} 
 
 /** Remove bootstap sort arrows */
 table.dataTable thead .sorting:before, table.dataTable thead .sorting_asc:before,

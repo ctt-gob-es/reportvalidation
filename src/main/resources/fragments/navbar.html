@@ -16,7 +16,7 @@
 			<ul class="navbar-nav  ">
 
 				<li class="font-weight-bold nav-item mr-1 ml-2"><a
-					class="nav-link" th:href="@{/files/}" th:text="#{breadcrumb.files}"></a></li>
+					class="nav-link" th:href="@{/files}" th:text="#{breadcrumb.files}"></a></li>
 
 				<li sec:authorize="hasAuthority('admin')"
 					class="font-weight-bold nav-item dropdown mr-1 ml-2"><a
@@ -36,6 +36,9 @@
 			src="/images/logo-entity.png" height="72" alt="">
 		</a>
 	</nav>
+	<div class="container-fluid">
+		<h1 th:text="#{html.title}"></h1>
+	</div>
 </div>
 <div th:fragment="navbarWithoutMenu">
 	<nav class="navbar navbar-expand-lg navbar-light bg-white ">

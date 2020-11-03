@@ -5,7 +5,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,6 +42,7 @@ public class XlsxValidator {
 	/** The num pages. */
 	private int numPages = 0;
 
+	/** The evaluator. */
 	private FormulaEvaluator evaluator;
 
 	/**
@@ -47,8 +51,9 @@ public class XlsxValidator {
 	 * @param workbook the workbook
 	 * @return the list
 	 */
-	public List<ValidationError> validate(final Workbook workbook) {
-		List<ValidationError> errors = new ArrayList<ValidationError>();
+	public Map<String, List<ValidationError>> validate(final Workbook workbook) {
+
+		Map<String, List<ValidationError>> errorMap = new TreeMap<String, List<ValidationError>>();
 		evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
 		final Sheet sheet01 = workbook.getSheetAt(1);
@@ -60,16 +65,17 @@ public class XlsxValidator {
 		final Sheet sheetP4 = workbook.getSheetAt(7);
 		final Sheet sheetResults = workbook.getSheetAt(8);
 
-		errors.addAll(validateSheet01(sheet01));
-		errors.addAll(validateSheet02(sheet02));
-		errors.addAll(validateSheet03(sheet03));
-		errors.addAll(validateSheetPrinciple(sheetP1, 19, 776));
-		errors.addAll(validateSheetPrinciple(sheetP2, 19, 661));
-		errors.addAll(validateSheetPrinciple(sheetP3, 19, 395));
-		errors.addAll(validateSheetPrinciple(sheetP4, 19, 129));
-		errors.addAll(validateSheetResults(sheetResults));
-		Collections.sort(errors);
-		return errors;
+		errorMap.put(sheet01.getSheetName(), validateSheet01(sheet01));
+		errorMap.put(sheet02.getSheetName(), validateSheet02(sheet02));
+		errorMap.put(sheet03.getSheetName(), validateSheet03(sheet03));
+		errorMap.put(sheetP1.getSheetName(), validateSheetPrinciple(sheetP1, 19, 776));
+		errorMap.put(sheetP2.getSheetName(), validateSheetPrinciple(sheetP2, 19, 661));
+		errorMap.put(sheetP3.getSheetName(), validateSheetPrinciple(sheetP3, 19, 395));
+		errorMap.put(sheetP4.getSheetName(), validateSheetPrinciple(sheetP4, 19, 129));
+		errorMap.put(sheetResults.getSheetName(), validateSheetResults(sheetResults));
+
+		
+		return errorMap;
 
 	}
 
@@ -340,10 +346,9 @@ public class XlsxValidator {
 	/**
 	 * Validate sheet principle.
 	 *
-	 * @param sheet                           the sheet
-	 * @param beginRow                        the begin row
-	 * @param endRow                          the end row
-	 * @param ValidatorConstants.RESULT_TYPES
+	 * @param sheet    the sheet
+	 * @param beginRow the begin row
+	 * @param endRow   the end row
 	 * @return the list
 	 */
 	private List<ValidationError> validateSheetPrinciple(final Sheet sheet, final int beginRow, final int endRow) {

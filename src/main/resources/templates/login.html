@@ -6,7 +6,7 @@
 <body>
 	<div th:include="../fragments/navbar :: navbarWithoutMenu"></div>
 	<div class="container catmin-login-form">
-
+		<h1 th:text="#{html.title}"></h1>
 		<form th:action="@{/login}" method="POST" class="form-signin">
 			<h3 class="form-signin-heading" th:text="#{page.login.title}"></h3>
 			<div class="alert alert-danger alert-dismissible fade show"

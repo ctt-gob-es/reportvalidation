@@ -7,5 +7,6 @@
 		<class>es.oaw.irapvalidator.model.Role</class>
 		<class>es.oaw.irapvalidator.model.User</class>
 		<class>es.oaw.irapvalidator.model.Dir3</class>
+		<class>es.oaw.irapvalidator.model.ValidatedFile</class>
 	</persistence-unit>
 </persistence>

@@ -1,53 +1,54 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	  xmlns:th="http://www.thymeleaf.org"
-	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
 
 <head th:include="../fragments/header :: header"></head>
 
-    <body>
-		<div id="dropzone">
-			<form method="POST" enctype="multipart/form-data" action="/files/" class="dropzone" id="uploader" >
-			</form>
-		</div>
+<body>
+	<div th:include="../fragments/navbar :: navbar"></div>
+	<div id="dropzone">
+		<form method="POST" enctype="multipart/form-data" action="/files/"
+			class="dropzone" id="uploader"></form>
+	</div>
 
-		<div>
-			<p></p>
-			<input type="submit" value="Validar ficheros" id="btnUpload">
-		</div>
+	<div>
+		<p></p>
+		<input type="submit" value="Validar ficheros" id="btnUpload">
+	</div>
 
-		<script>
-			Dropzone.autoDiscover = false;
-			window.onload = function () {
-				var dropzoneOptions = {
-					dictDefaultMessage: "Arrastre ficheros validación...",
-					paramName: "files",
-					acceptedFiles: '.xlsx, .ods',
-					addRemoveLinks: true,
-					maxFilesize: 3.0,
-					maxFiles: 10,
-					parallelUploads: 10,
-					uploadMultiple: true,
-					autoProcessQueue: false,
-					maxFiles: 10,
-					init: function () {
-						this.on("success", function (file, responseText) {
-							document.open();
-							document.write(responseText);
-							});
-					}
-				};
-				var uploader = document.querySelector("#uploader");
-				var newDropzone = new Dropzone(uploader, dropzoneOptions);
-
-				$("#btnUpload").on("click", function () {
-					newDropzone.processQueue();
-				});
-				console.log("Dropzone configured");
+	<script>
+		Dropzone.autoDiscover = false;
+		window.onload = function() {
+			var dropzoneOptions = {
+				dictDefaultMessage : "Arrastre ficheros validación...",
+				paramName : "files",
+				acceptedFiles : '.xlsx, .ods',
+				addRemoveLinks : true,
+				maxFilesize : 3.0,
+				maxFiles : 10,
+				parallelUploads : 10,
+				uploadMultiple : true,
+				autoProcessQueue : false,
+				maxFiles : 10,
+				init : function() {
+					this.on("success", function(file, responseText) {
+						document.open();
+						document.write(responseText);
+					});
+				}
 			};
+			var uploader = document.querySelector("#uploader");
+			var newDropzone = new Dropzone(uploader, dropzoneOptions);
 
-		</script>
+			$("#btnUpload").on("click", function() {
+				newDropzone.processQueue();
+			});
+			console.log("Dropzone configured");
+		};
+	</script>
 
-		<div th:include="${content} :: content"></div>
-	</body>
+	<div th:include="${content} :: content"></div>
+	<div th:include="../fragments/footer :: footer"></div>
+</body>
 </html>

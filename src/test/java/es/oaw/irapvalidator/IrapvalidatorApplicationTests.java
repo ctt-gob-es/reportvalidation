@@ -3,8 +3,8 @@ package es.oaw.irapvalidator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.junit.jupiter.api.Test;
@@ -41,13 +41,13 @@ class IrapvalidatorApplicationTests {
 				"/home/alvaro/Development/Projects/irapvalidator/src/test/resources/Informe_Revision_Profunidad_v1.xlsx");
 		FileInputStream inputStream = new FileInputStream(inputFile);
 		XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-		List<ValidationError> errors = xlsxValidator.validate(workbook);
-		if (!CollectionUtils.isEmpty(errors)) {
-			for (ValidationError error : errors) {
-				System.out.println(error.toString());
-			}
-
-		}
+		Map<String,List<ValidationError>> errors = xlsxValidator.validate(workbook);
+//		if (!CollectionUtils.isEmpty(errors)) {
+//			for (ValidationError error : errors) {
+//				System.out.println(error.toString());
+//			}
+//
+//		}
 
 	}
 
@@ -62,13 +62,13 @@ class IrapvalidatorApplicationTests {
 		File inputFile = new File(
 				"/home/alvaro/Development/Projects/irapvalidator/src/test/resources/Informe_Revision_Profunidad_v1.ods");
 		final SpreadSheet workbook = SpreadSheet.createFromFile(inputFile);
-		List<ValidationError> errors = odsValidator.validate(workbook);
-		if (!CollectionUtils.isEmpty(errors)) {
-			for (ValidationError error : errors) {
-				System.out.println(error.toString());
-			}
-
-		}
+		Map<String,List<ValidationError>> errors = odsValidator.validate(workbook);
+//		if (!CollectionUtils.isEmpty(errors)) {
+//			for (ValidationError error : errors) {
+//				System.out.println(error.toString());
+//			}
+//
+//		}
 
 	}
 

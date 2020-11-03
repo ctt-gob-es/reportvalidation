@@ -55,3 +55,16 @@ ALTER TABLE dir3
   ADD PRIMARY KEY (C_ID_UD_ORGANICA),
   ADD KEY C_ID_UD_ORGANICA (C_ID_UD_ORGANICA),
   ADD KEY C_ID_NIVEL_ADMON (C_ID_NIVEL_ADMON);
+  
+  
+DROP TABLE IF EXISTS files;
+  
+CREATE TABLE files (
+  id varchar(255) NOT NULL,
+  data longblob,
+  name varchar(255) DEFAULT NULL,
+  type varchar(255) DEFAULT NULL,
+  PRIMARY KEY (id)
+) ;
+
+

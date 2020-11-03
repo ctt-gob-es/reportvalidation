@@ -1,12 +1,16 @@
 package es.oaw.irapvalidator.controller;
 
-import es.oaw.irapvalidator.Constants;
-import es.oaw.irapvalidator.model.ResponseValidatedFile;
-import es.oaw.irapvalidator.model.ValidatedFile;
-import es.oaw.irapvalidator.storage.FileDbStorageService;
-import es.oaw.irapvalidator.validator.OdsValidator;
-import es.oaw.irapvalidator.validator.ValidationError;
-import es.oaw.irapvalidator.validator.XlsxValidator;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,60 +18,76 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import es.oaw.irapvalidator.Constants;
+import es.oaw.irapvalidator.model.ResponseValidatedFile;
+import es.oaw.irapvalidator.model.ValidatedFile;
+import es.oaw.irapvalidator.storage.FileDbStorageService;
+import es.oaw.irapvalidator.validator.OdsValidator;
+import es.oaw.irapvalidator.validator.ValidationError;
+import es.oaw.irapvalidator.validator.XlsxValidator;
 
+/**
+ * The Class FileUploadController.
+ */
 @Controller
 @RequestMapping(path = Constants.UPLOAD_CONTROLLER_PATH)
 public class FileUploadController {
 
+	/** The storage service. */
 	@Autowired
 	private FileDbStorageService storageService;
 
+	/** The ods validator. */
 	@Autowired
 	private OdsValidator odsValidator;
 
+	/** The xlsx validator. */
 	@Autowired
 	private XlsxValidator xlsxValidator;
 
+	/** The tmp path. */
 	String TMP_PATH = "src/main/resources/targetFile.tmp";
 
-	@GetMapping("/")
+	/**
+	 * List uploaded files.
+	 *
+	 * @param model the model
+	 * @return the string
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	@GetMapping
 	public String listUploadedFiles(Model model) throws IOException {
 		List<ResponseValidatedFile> files = storageService.getAllFiles().map(dbFile -> {
-			String fileDownloadUri = ServletUriComponentsBuilder
-					.fromCurrentContextPath()
-					.path("/files/")
-					.path(dbFile.getId())
-					.toUriString();
+			String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/")
+					.path(dbFile.getId()).toUriString();
 
-			ResponseValidatedFile fileResponse = new ResponseValidatedFile(
-					dbFile.getName(),
-					fileDownloadUri,
-					dbFile.getType(),
-					dbFile.getData().length);
+			ResponseValidatedFile fileResponse = new ResponseValidatedFile(dbFile.getName(), fileDownloadUri,
+					dbFile.getType(), dbFile.getData().length);
 
 			return fileResponse;
 		}).collect(Collectors.toList());
 
 		model.addAttribute("files", files);
-		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_TABLE);
-		return Constants.TEMPLATE_DRAG_UPLOAD;
+		model.addAttribute("content", "../fragments/files/" + Constants.FRAGMENT_UPLOAD_TABLE);
+		return Constants.TEMPLATE_LOGGED_IN;
 	}
 
+	/**
+	 * Serve file.
+	 *
+	 * @param filename the filename
+	 * @return the response entity
+	 */
 	@GetMapping("/{filename:.+}")
 	@ResponseBody
 	public ResponseEntity<byte[]> serveFile(@PathVariable String filename) {
@@ -78,9 +98,17 @@ public class FileUploadController {
 				.body(file.getData());
 	}
 
+	/**
+	 * Handle file upload.
+	 *
+	 * @param request            the request
+	 * @param redirectAttributes the redirect attributes
+	 * @param model              the model
+	 * @return the string
+	 */
 	@PostMapping("/")
-	public String handleFileUpload(MultipartHttpServletRequest request,
-								   RedirectAttributes redirectAttributes, Model model) {
+	public String handleFileUpload(MultipartHttpServletRequest request, RedirectAttributes redirectAttributes,
+			Model model) {
 
 		Map<String, MultipartFile> fileMap = request.getFileMap();
 		List<String> validFiles = new ArrayList<>();
@@ -90,36 +118,36 @@ public class FileUploadController {
 			try {
 				String filename = file.getOriginalFilename();
 				String ext = filename.substring(filename.lastIndexOf(".") + 1);
-				List<ValidationError> errors = new ArrayList<>();
+				Map<String, List<ValidationError>> errors = new HashMap();
 
-				switch (ext){
-					case "ods":
+				switch (ext) {
+				case "ods":
 
-						try {
-							//we need to write the file to disk in order to read it as ods...
-							InputStream inputStream = file.getInputStream();
-							byte[] buffer = new byte[inputStream.available()];
-							inputStream.read(buffer);
-							File targetFile = new File(TMP_PATH);
-							OutputStream outStream = new FileOutputStream(targetFile);
-							outStream.write(buffer);
-							final SpreadSheet spreadSheet = SpreadSheet.createFromFile(targetFile);
-							errors = odsValidator.validate(spreadSheet);
-							targetFile.delete();
-						} catch (Exception e) {
-							throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
-						}
-						break;
-					case "xlsx":
-						XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-						errors = xlsxValidator.validate(workbook);
-						break;
+					try {
+						// we need to write the file to disk in order to read it as ods...
+						InputStream inputStream = file.getInputStream();
+						byte[] buffer = new byte[inputStream.available()];
+						inputStream.read(buffer);
+						File targetFile = new File(TMP_PATH);
+						OutputStream outStream = new FileOutputStream(targetFile);
+						outStream.write(buffer);
+						final SpreadSheet spreadSheet = SpreadSheet.createFromFile(targetFile);
+						errors = odsValidator.validate(spreadSheet);
+						targetFile.delete();
+						outStream.close();
+					} catch (Exception e) {
+						throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
+					}
+					break;
+				case "xlsx":
+					XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+					errors = xlsxValidator.validate(workbook);
+					break;
 				}
 
-				if (errors.size() != 0){
+				if (errors.size() != 0) {
 					invalidFiles.add(new ErrorInfo(filename, errors));
-				}
-				else{
+				} else {
 					validFiles.add(file.getOriginalFilename());
 					storageService.store(file);
 				}
@@ -128,27 +156,50 @@ public class FileUploadController {
 			}
 		}
 
-		model.addAttribute("valid", validFiles );
-		model.addAttribute("invalid", invalidFiles );
-		model.addAttribute("content", "../fragments/" + Constants.FRAGMENT_UPLOAD_SUMMARY);
+		model.addAttribute("valid", validFiles);
+		model.addAttribute("invalid", invalidFiles);
+		model.addAttribute("content", "../fragments/files/" + Constants.FRAGMENT_UPLOAD_SUMMARY);
 		return Constants.TEMPLATE_LOGGED_IN;
 	}
 
-	/***
-	 * Temporary until proper validation is implemented
+	/**
+	 * * Temporary until proper validation is implemented.
 	 */
-	public static class ErrorInfo
-	{
-		private final String filename;
-		private final List<ValidationError> errors;
+	public static class ErrorInfo {
 
-		public ErrorInfo(String filename, List<ValidationError> errors)
-		{
+		/** The filename. */
+		private final String filename;
+
+		/** The errors. */
+		private final Map<String, List<ValidationError>> errors;
+
+		/**
+		 * Instantiates a new error info.
+		 *
+		 * @param filename the filename
+		 * @param errors   the errors
+		 */
+		public ErrorInfo(String filename, Map<String, List<ValidationError>>errors) {
 			this.filename = filename;
 			this.errors = errors;
 		}
 
-		public String getFilename()   { return this.filename; }
-		public List<ValidationError> getErrors() { return this.errors; }
+		/**
+		 * Gets the filename.
+		 *
+		 * @return the filename
+		 */
+		public String getFilename() {
+			return this.filename;
+		}
+
+		/**
+		 * Gets the errors.
+		 *
+		 * @return the errors
+		 */
+		public Map<String, List<ValidationError>> getErrors() {
+			return this.errors;
+		}
 	}
 }

@@ -2,7 +2,6 @@ package es.oaw.irapvalidator.controller;
 
 import javax.servlet.http.HttpSession;
 
-import es.oaw.irapvalidator.Constants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,13 +21,13 @@ public class IndexController {
 	/**
 	 * Index.
 	 *
-	 * @param model      the model
-	 * @param session    the session
+	 * @param model   the model
+	 * @param session the session
 	 * @return the string
 	 */
 	@GetMapping
 	public String index(Model model, HttpSession session) {
-		return "redirect:/files/";
+		return "redirect:/files";
 	}
 
 	/**

@@ -1,0 +1,103 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<div th:fragment="content">
+
+
+
+	<div class="container-fluid">
+
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/"
+					th:text="#{breadcrumb.home}"></a></li>
+				<li class="breadcrumb-item active" aria-current="page"
+					th:text="#{breadcrumb.file.upload}"></li>
+			</ol>
+		</nav>
+
+		<h2 th:text="#{breadcrumb.file.upload}"></h2>
+		<div class="alert alert-danger" role="alert" style="display: none;"
+			th:text="#{file.none.added}"></div>
+		<div class="card">
+			<div class="card-header" th:text="#{file.upload.info}"></div>
+			<div class="card-body">
+				<div class="form-group ">
+					<div id="dropzone">
+						<form method="POST" enctype="multipart/form-data" action="/files/"
+							class="dropzone" id="uploader"></form>
+					</div>
+				</div>
+				<div>
+					<input class="btn btn-primary" type="submit"
+						th:value="#{button.validate.files}" id="btnUpload">
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<script>
+		Dropzone.autoDiscover = false;
+		window.onload = function() {
+			var dropzoneOptions = {
+				dictDefaultMessage : "Arrastre ficheros validación o pulse para seleccionar...",
+				paramName : "files",
+				acceptedFiles : '.xlsx, .ods',
+				addRemoveLinks : true,
+				maxFilesize : 3.0,
+				maxFiles : 10,
+				parallelUploads : 10,
+				uploadMultiple : true,
+				autoProcessQueue : false,
+				maxFiles : 10,
+				init : function() {
+					this.on("success", function(file, responseText) {
+						document.open();
+						document.write(responseText);
+					});
+				}
+			};
+			var uploader = document.querySelector("#uploader");
+			var newDropzone = new Dropzone(uploader, dropzoneOptions);
+
+			$("#btnUpload").on("click", function() {
+
+				$('.alert-danger').hide();
+				if (newDropzone.getQueuedFiles().length > 0) {
+					newDropzone.processQueue();
+				} else {
+					$('.alert-danger').show();
+				}
+
+				//newDropzone.processQueue();
+			});
+			//console.log("Dropzone configured");
+		};
+	</script>
+
+	<!-- 
+	<h4 th:text=#{file.saved}></h4>
+	<table>
+		<thead>
+			<tr>
+				<th th:text="#{file.name}"></th>
+				<th th:text="#{file.url}"></th>
+				<th th:text="#{file.type}"></th>
+				<th th:text="#{file.size}"></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:if="${files.empty}">
+				<td colspan="4" th:text=#{file.none}></td>
+			</tr>
+			<tr th:each="file : ${files}">
+				<td><span th:text="${file.name}"> Nombre </span></td>
+				<td><a th:href="${file.url}" th:text="link"></a></td>
+				<td><span th:text="${file.type}"> Tipo </span></td>
+				<td><span th:text="${file.size}"> Tamaño </span></td>
+			</tr>
+		</tbody>
+	</table>
+	 -->
+</div>
+</html>

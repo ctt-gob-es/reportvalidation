@@ -1,0 +1,110 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<div th:fragment="content">
+
+
+
+
+	<div class="container-fluid">
+
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/"
+					th:text="#{breadcrumb.home}"></a></li>
+				<li class="breadcrumb-item active" aria-current="page"
+					th:text="#{breadcrumb.file.summary}"></li>
+			</ol>
+		</nav>
+
+		<h2 th:text="#{breadcrumb.file.summary}"></h2>
+		<div class="card">
+			<div class="card-header" th:text="#{file.valid.files}"></div>
+			<div class="card-body">
+				<div class="container-fluid">
+					<div th:if="${valid.empty}" class="p-3 mb-2 bg-white text-dark">
+						<span th:text="#{file.none}"></span>
+					</div>
+					<div th:each="filename : ${valid}"
+						class="p-3 mb-2 bg-success text-white">
+						<span th:text="${filename}"> </span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card" id="invalidFilesResults">
+			<div class="card-header" th:text="#{file.invalid.files}"></div>
+			<div class="card-body">
+				<div class="container-fluid">
+
+
+					<div class="row-fluid" th:if="${invalid.empty}">
+						<span th:text="#{file.name}"></span>
+					</div>
+
+					<div class="row-fluid" th:each="errorInfo,iter : ${invalid}">
+						<div class="row p-3 bg-danger text-white font-weight-bold">
+							<div class="col-10">
+								<span th:text="${errorInfo.filename}"></span>
+							</div>
+							<div class="col-2 text-right">
+								<button class="btn btn-dark btn-sm  fa fa-plus" type="button"
+									aria-hidden="true" data-toggle="collapse"
+									th:attr="data-target='#collapse' + ${iter.index}, aria-controls='#collapse' + ${iter.index}"
+									aria-expanded="true"></button>
+							</div>
+
+						</div>
+
+						<div class="row border mb-2 collapse"
+							th:each="entry : ${errorInfo.errors}"
+							th:id="${'collapse'+iter.index}">
+							<div
+								class="col-4 p-3 bg-light text-dark font-weight-bold border-right">
+								<span th:text="${entry.key}"></span>
+							</div>
+							<div class="col-8">
+								<div th:if="${entry.value.empty}">
+									<div class="row p-3 bg-light text-dark"
+										th:text="#{file.validation.sheet.no.errors}"></div>
+								</div>
+								<div
+									class="row p-3 bg-light text-dark font-weight-bold border-bottom"
+									th:if="${!entry.value.empty}">
+									<div class="col-2" th:text="#{file.cell}"></div>
+									<div class="col-10" th:text="#{file.validation.message}"></div>
+								</div>
+								<div class="row p-3 bg-warning text-dark"
+									th:each="error : ${entry.value}">
+									<div class="col-2" th:text="${error.cell}"></div>
+									<div class="col-10" th:text="${error.message}"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<a th:href="@{/}" th:text="#{button.back}" class="btn btn-primary"></a>
+	</div>
+
+
+
+	<script type="text/javascript">
+		$('body').on(
+				'click',
+				'.fa-minus',
+				function() {
+					$(this).parent().find(".fa-minus").removeClass("fa-minus")
+							.addClass("fa-plus");
+				});
+
+		$('body').on(
+				'click',
+				'.fa-plus',
+				function() {
+					$(this).parent().find(".fa-plus").removeClass("fa-plus")
+							.addClass("fa-minus");
+				});
+	</script>
+</div>
+</html>

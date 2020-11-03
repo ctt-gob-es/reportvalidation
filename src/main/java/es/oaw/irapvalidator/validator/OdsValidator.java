@@ -4,8 +4,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.util.CellReference;
@@ -42,8 +43,8 @@ public class OdsValidator {
 	 * @param workbook the workbook
 	 * @return the list
 	 */
-	public List<ValidationError> validate(final SpreadSheet workbook) {
-		List<ValidationError> errors = new ArrayList<ValidationError>();
+	public Map<String, List<ValidationError>> validate(final SpreadSheet workbook) {
+		Map<String, List<ValidationError>> errorMap = new TreeMap<String, List<ValidationError>>();
 
 		final Sheet sheet01 = workbook.getSheet(1);
 		final Sheet sheet02 = workbook.getSheet(2);
@@ -54,16 +55,16 @@ public class OdsValidator {
 		final Sheet sheetP4 = workbook.getSheet(7);
 		final Sheet sheetResults = workbook.getSheet(8);
 
-		errors.addAll(validateSheet01(sheet01));
-		errors.addAll(validateSheet02(sheet02));
-		errors.addAll(validateSheet03(sheet03));
-		errors.addAll(validateSheetPrinciple(sheetP1, 19, 776));
-		errors.addAll(validateSheetPrinciple(sheetP2, 19, 661));
-		errors.addAll(validateSheetPrinciple(sheetP3, 19, 395));
-		errors.addAll(validateSheetPrinciple(sheetP4, 19, 129));
-		errors.addAll(validateSheetResults(sheetResults));
-		Collections.sort(errors);
-		return errors;
+		errorMap.put(sheet01.getName(), validateSheet01(sheet01));
+		errorMap.put(sheet02.getName(), validateSheet02(sheet02));
+		errorMap.put(sheet03.getName(), validateSheet03(sheet03));
+		errorMap.put(sheetP1.getName(), validateSheetPrinciple(sheetP1, 19, 776));
+		errorMap.put(sheetP2.getName(), validateSheetPrinciple(sheetP2, 19, 661));
+		errorMap.put(sheetP3.getName(), validateSheetPrinciple(sheetP3, 19, 395));
+		errorMap.put(sheetP4.getName(), validateSheetPrinciple(sheetP4, 19, 129));
+		errorMap.put(sheetResults.getName(), validateSheetResults(sheetResults));
+
+		return errorMap;
 
 	}
 
