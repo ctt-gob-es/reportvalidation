@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+
+    springboot:
+      build: ./java  
+      ports:
+        - "18091:8090" 
+      depends_on:
+        - mysql
+      links:
+        - mysql
+      container_name: irap_springboot
+      
+    mysql:
+      image: mysql:5.7.21
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: irapvalidator 
+      command: --sql_mode="" --max_allowed_packet=32505856 --skip-innodb-use-native-aio
+      volumes:
+        - "./mysql/01.CREATE_DATABASE.sql:/docker-entrypoint-initdb.d/z_01.CREATE_DATABASE.sql"
+        - "./mysql/02.INSERT_DIR3.sql:/docker-entrypoint-initdb.d/z_02.INSERT_DIR3.sql" 
+        - ./volumes/mysql:/var/lib/mysql
+  
+    adminer:
+      image: adminer
+      restart: always
+      ports:
+        - 13307:8080

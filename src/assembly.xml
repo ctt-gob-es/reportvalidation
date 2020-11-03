@@ -1,0 +1,30 @@
+<assembly>
+	<id>docker</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+			<directory>docker</directory>
+			<excludes>
+				<exclude>volumes/**</exclude>
+			</excludes>
+			<outputDirectory>/</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>scripts/${version}</directory>
+			<includes>
+				<include>01.CREATE_DATABASE.sql</include>
+				<include>02.INSERT_DIR3.sql</include>
+			</includes>
+			<outputDirectory>mysql</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>target</directory>
+			<includes>
+				<include>irapvalidator.jar</include>
+			</includes>
+			<outputDirectory>/java</outputDirectory>
+		</fileSet>
+	</fileSets>
+</assembly>

@@ -56,7 +56,7 @@ public class FileUploadController {
 	private XlsxValidator xlsxValidator;
 
 	/** The tmp path. */
-	String TMP_PATH = "src/main/resources/targetFile.tmp";
+	String TMP_PATH = "/tmp/targetFile.tmp";
 
 	/**
 	 * List uploaded files.
