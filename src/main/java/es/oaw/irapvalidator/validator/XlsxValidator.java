@@ -55,7 +55,7 @@ public class XlsxValidator {
 
 		Map<String, List<ValidationError>> errorMap = new TreeMap<String, List<ValidationError>>();
 		evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-
+		numPages = 0;
 		final Sheet sheet01 = workbook.getSheetAt(1);
 		final Sheet sheet02 = workbook.getSheetAt(2);
 		final Sheet sheet03 = workbook.getSheetAt(3);
@@ -74,7 +74,6 @@ public class XlsxValidator {
 		errorMap.put(sheetP4.getSheetName(), validateSheetPrinciple(sheetP4, 19, 129));
 		errorMap.put(sheetResults.getSheetName(), validateSheetResults(sheetResults));
 
-		
 		return errorMap;
 
 	}
@@ -136,8 +135,8 @@ public class XlsxValidator {
 
 		boolean atLeastOneAmbit = false;
 		for (int i = 0; i < atLeastOneSelectedLastRow - atLeastOneSelectedFirstRow; i++) {
-			if (ValidatorConstants.YES_VALUE
-					.equalsIgnoreCase(getCellValue(sheet, atLeastOneSelectedColumn + atLeastOneSelectedFirstRow + i))) {
+			if (ValidatorConstants.YES_VALUE.equalsIgnoreCase(
+					getCellValue(sheet, atLeastOneSelectedColumn + (atLeastOneSelectedFirstRow + i)))) {
 				atLeastOneAmbit = true;
 				break;
 			}
@@ -261,55 +260,69 @@ public class XlsxValidator {
 				// If detect any cell filled, count
 				numPages++;
 
-				// Check C column if filled
-
-				if (cellIsEmpty(sheet, shortNameCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), shortNameCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_SHORTNAME,
-									new String[] { shortNameCell }, LocaleContextHolder.getLocale())));
-
-				}
-
-				// Check D column has a valid value
-
-				if (cellIsEmpty(sheet, typeCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), typeCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_TYPE,
-									new String[] { typeCell }, LocaleContextHolder.getLocale())));
-				} else if (!Arrays.asList(ValidatorConstants.ALLOWED_PAGE_TYPES)
-						.contains(getCellValue(sheet, typeCell))) {
-					errors.add(new ValidationError(sheet.getSheetName(), typeCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_TYPE,
-									new String[] { typeCell }, LocaleContextHolder.getLocale())));
-				}
-
-				// Check E column is a valid URL
-
-				if (cellIsEmpty(sheet, urlCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), urlCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_URL,
-									new String[] { urlCell }, LocaleContextHolder.getLocale())));
-				} else {
-					try {
-						new URL(getCellValue(sheet, urlCell));
-					} catch (MalformedURLException e) {
-						errors.add(new ValidationError(sheet.getSheetName(), urlCell,
-								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_URL,
-										new String[] { urlCell }, LocaleContextHolder.getLocale())));
-					}
-
-				}
-
-				// Check F column if filled
-
-				if (cellIsEmpty(sheet, breadcumbCell)) {
-					errors.add(new ValidationError(sheet.getSheetName(), breadcumbCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_BREADCUMB,
-									new String[] { breadcumbCell }, LocaleContextHolder.getLocale())));
-
-				}
 			}
 
+		}
+
+		// After count
+
+		initRow = 8;
+		for (int i = 0; i < numPages; i++) {
+
+			// Check C column if filled
+
+			int currentRow = i + initRow;
+			String shortNameCell = ValidatorConstants.COLUMN_C + currentRow;
+			String typeCell = ValidatorConstants.COLUMN_D + currentRow;
+			String urlCell = ValidatorConstants.COLUMN_E + currentRow;
+			String breadcumbCell = ValidatorConstants.COLUMN_F + currentRow;
+
+			// Check C column if filled
+
+			if (cellIsEmpty(sheet, shortNameCell)) {
+				errors.add(new ValidationError(sheet.getSheetName(), shortNameCell,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_SHORTNAME,
+								new String[] { shortNameCell }, LocaleContextHolder.getLocale())));
+
+			}
+
+			// Check D column has a valid value
+
+			if (cellIsEmpty(sheet, typeCell)) {
+				errors.add(new ValidationError(sheet.getSheetName(), typeCell,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_TYPE,
+								new String[] { typeCell }, LocaleContextHolder.getLocale())));
+			} else if (!Arrays.asList(ValidatorConstants.ALLOWED_PAGE_TYPES).contains(getCellValue(sheet, typeCell))) {
+				errors.add(new ValidationError(sheet.getSheetName(), typeCell,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_TYPE,
+								new String[] { typeCell }, LocaleContextHolder.getLocale())));
+			}
+
+			// Check E column is a valid URL
+
+			if (cellIsEmpty(sheet, urlCell)) {
+				errors.add(new ValidationError(sheet.getSheetName(), urlCell,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_URL, new String[] { urlCell },
+								LocaleContextHolder.getLocale())));
+			} else {
+				try {
+					new URL(getCellValue(sheet, urlCell));
+				} catch (MalformedURLException e) {
+					errors.add(new ValidationError(sheet.getSheetName(), urlCell,
+							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_URL,
+									new String[] { urlCell }, LocaleContextHolder.getLocale())));
+				}
+
+			}
+
+			// Check F column if filled
+
+			if (cellIsEmpty(sheet, breadcumbCell)) {
+				errors.add(new ValidationError(sheet.getSheetName(), breadcumbCell,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_BREADCUMB,
+								new String[] { breadcumbCell }, LocaleContextHolder.getLocale())));
+
+			}
 		}
 
 		// Check if number of indicated (D45)
@@ -671,7 +684,7 @@ public class XlsxValidator {
 		Row r = sheet.getRow(ref.getRow());
 		Cell c = r.getCell(ref.getCol());
 		if (c == null || CellType.BLANK.equals(c.getCellType())
-				|| (CellType.STRING.equals(c.getCellType()) && StringUtils.isEmpty(c.getStringCellValue()))) {
+				|| (CellType.STRING.equals(c.getCellType()) && StringUtils.isEmpty(c.getStringCellValue().trim()))) {
 			return true;
 		}
 

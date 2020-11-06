@@ -11,14 +11,14 @@
 									.DataTable(
 											{
 												language : {
-													"url" : "/js/datatables.spanish.json"
+													"url" : "js/datatables.spanish.json"
 												},
 												processing : true,
 												serverSide : true,
 												searching : false,
 
 												ajax : {
-													url : "/users/all",
+													url : "users/all",
 													dataSrc : "content",
 													"type" : "POST",
 													"contentType" : "application/json; charset=utf-8",
@@ -115,17 +115,17 @@
 						});
 
 		function deleteUser(id) {
-			$("#deleteUsuarioDialogConfirm").click(function(){window.location.replace("/users/delete/" + id); });
+			$("#deleteUsuarioDialogConfirm").click(function(){window.location.replace("users/delete/" + id); });
 			$('#deleteUsuarioDialog').modal('toggle');
 		};
 		
 		function deactivate(id) {
-			$("#deactivateUsuarioDialogConfirm").click(function(){window.location.replace("/users/deactivate/" + id); });
+			$("#deactivateUsuarioDialogConfirm").click(function(){window.location.replace("users/deactivate/" + id); });
 			$('#deactivateUsuarioDialog').modal('toggle');
 		};
 		
 		function activate(id) {
-			$("#activateUsuarioDialogConfirm").click(function(){window.location.replace("/users/activate/" + id); });
+			$("#activateUsuarioDialogConfirm").click(function(){window.location.replace("users/activate/" + id); });
 			$('#activateUsuarioDialog').modal('toggle');
 		};
 		

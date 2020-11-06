@@ -145,11 +145,25 @@ public class FileUploadController {
 					break;
 				}
 
-				if (errors.size() != 0) {
-					invalidFiles.add(new ErrorInfo(filename, errors));
+				if (errors != null) {
+
+					boolean hasErrors = false;
+					for (Map.Entry<String, List<ValidationError>> entry : errors.entrySet()) {
+						if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+							hasErrors = true;
+							break;
+						}
+
+					}
+
+					if (hasErrors) {
+						invalidFiles.add(new ErrorInfo(filename, errors));
+					} else {
+						validFiles.add(file.getOriginalFilename());
+					}
 				} else {
 					validFiles.add(file.getOriginalFilename());
-					storageService.store(file);
+					// storageService.store(file);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -179,7 +193,7 @@ public class FileUploadController {
 		 * @param filename the filename
 		 * @param errors   the errors
 		 */
-		public ErrorInfo(String filename, Map<String, List<ValidationError>>errors) {
+		public ErrorInfo(String filename, Map<String, List<ValidationError>> errors) {
 			this.filename = filename;
 			this.errors = errors;
 		}

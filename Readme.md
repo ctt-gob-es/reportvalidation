@@ -1,0 +1,1 @@
+nohup /usr/java/jdk1.8.0_202/bin/java -jar irapvalidator.jar &
