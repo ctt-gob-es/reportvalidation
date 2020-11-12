@@ -60,4 +60,14 @@ CREATE TABLE files (
   PRIMARY KEY (id)
 ) ;
 
+DROP TABLE IF EXISTS configuration;
+
+CREATE TABLE configuration (
+    id int NOT NULL AUTO_INCREMENT,
+    `key` varchar(64) NOT NULL,
+    `value` varchar(1024) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+INSERT INTO configuration(`key`,`value`) VALUES ('anonymous.access','true');
 

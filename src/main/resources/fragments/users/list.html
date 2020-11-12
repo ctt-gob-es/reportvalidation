@@ -168,6 +168,33 @@
 		<div class="container-fluid">
 			<div class="card">
 				<div class="card-header p-2">
+					<div class="col-sm-9 float-left">
+						<h4 th:text="#{users.access.config.title}"></h4>
+					</div>
+				</div>
+				<div class="card-body p-2">
+					<form action="#" th:action="@{/users/configuration}"
+						th:object="${accessConfiguration}" method="post">
+						<input th:field="*{id}" type="hidden" id="id" /> <input
+							th:field="*{key}" type="hidden" id="key" />
+						<div class="form-group">
+							<div class="col-sm-3 float-left">
+								<label for="roles" th:text="#{users.form.anonymous.access}"></label>
+							</div>
+							<div class="col-sm-3 float-left">
+								<select class="form-control" id="value" th:field="*{value}">
+									<option th:value="true" th:text="#{yes}"></option>
+									<option th:value="false" th:text="#{no}"></option>
+								</select>
+							</div>
+						</div>
+						<button type="submit" class="btn btn-primary"
+							th:text="#{button.submit}"></button>
+					</form>
+				</div>
+			</div>
+			<div class="card">
+				<div class="card-header p-2">
 
 					<div class="col-sm-9 float-left">
 						<h4 th:text="#{users.table.title}"></h4>

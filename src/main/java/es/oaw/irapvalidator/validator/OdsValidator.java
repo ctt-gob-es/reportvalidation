@@ -26,6 +26,12 @@ import es.oaw.irapvalidator.service.Dir3Service;
 @Service
 public class OdsValidator {
 
+	/** The principle table separation. */
+	private int principleTableSeparation = ValidatorConstants.PRINCIPLE_TABLE_SEPARATION_IRAP_35_PAGES;
+
+	/** The max num pages. */
+	private int maxNumPages = ValidatorConstants.MAX_PAGES;
+
 	/** The message source. */
 	@Autowired
 	private MessageSource messageSource;
@@ -58,10 +64,19 @@ public class OdsValidator {
 		errorMap.put(sheet01.getName(), validateSheet01(sheet01));
 		errorMap.put(sheet02.getName(), validateSheet02(sheet02));
 		errorMap.put(sheet03.getName(), validateSheet03(sheet03));
-		errorMap.put(sheetP1.getName(), validateSheetPrinciple(sheetP1, 19, 776));
-		errorMap.put(sheetP2.getName(), validateSheetPrinciple(sheetP2, 19, 661));
-		errorMap.put(sheetP3.getName(), validateSheetPrinciple(sheetP3, 19, 395));
-		errorMap.put(sheetP4.getName(), validateSheetPrinciple(sheetP4, 19, 129));
+
+		// in this sheet in old irap separation between las two tables is one row more
+		if (principleTableSeparation == ValidatorConstants.PRINCIPLE_TABLE_SEPARATION_IRAP_33_PAGES) {
+			errorMap.put(sheetP1.getName(), validateSheetPrinciple(sheetP1, 19, 647));
+			errorMap.put(sheetP2.getName(), validateSheetPrinciple(sheetP2, 19, 547));
+			errorMap.put(sheetP3.getName(), validateSheetPrinciple(sheetP3, 19, 319));
+			errorMap.put(sheetP4.getName(), validateSheetPrinciple(sheetP4, 19, 85));
+		} else {
+			errorMap.put(sheetP1.getName(), validateSheetPrinciple(sheetP1, 19, 776));
+			errorMap.put(sheetP2.getName(), validateSheetPrinciple(sheetP2, 19, 661));
+			errorMap.put(sheetP3.getName(), validateSheetPrinciple(sheetP3, 19, 395));
+			errorMap.put(sheetP4.getName(), validateSheetPrinciple(sheetP4, 19, 129));
+		}
 		errorMap.put(sheetResults.getName(), validateSheetResults(sheetResults));
 
 		return errorMap;
@@ -231,10 +246,38 @@ public class OdsValidator {
 	private List<ValidationError> validateSheet03(final Sheet sheet) {
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 
+		// in this sheet wil be detect id fils is older version wiith only 30 rows
+		// cell B31 will be 31
+		// D column next to B column "PAGINAS SELECCIONADAS"??
+
+		if (cellIsEmpty(sheet, "B38") || (!cellIsEmpty(sheet, "B38") && "31".equals(getCellValue(sheet, "B38")))) {
+			maxNumPages = 30;
+			principleTableSeparation = ValidatorConstants.PRINCIPLE_TABLE_SEPARATION_IRAP_33_PAGES;
+
+		}
+
+		// check if sample is correct
+		if (maxNumPages == 30) {
+			String cellReference = "D47";
+			if (ValidatorConstants.NO_VALUE.equalsIgnoreCase(getCellValue(sheet, cellReference))) {
+				errors.add(new ValidationError(sheet.getName(), cellReference,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_SAMPLE_CORRECT,
+								new String[] { cellReference }, LocaleContextHolder.getLocale())));
+			}
+
+		} else if (maxNumPages == 35) {
+			String cellReference = "D52";
+			if (ValidatorConstants.NO_VALUE.equalsIgnoreCase(getCellValue(sheet, cellReference))) {
+				errors.add(new ValidationError(sheet.getName(), cellReference,
+						messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_SAMPLE_CORRECT,
+								new String[] { cellReference }, LocaleContextHolder.getLocale())));
+			}
+		}
+
 		// if from 8 to 42 one of columns c,d,e is filled, this 3 columns will pass
 		// validations
 		int initRow = 8;
-		for (int i = 0; i < 35; i++) {
+		for (int i = 0; i < maxNumPages; i++) {
 
 			int currentRow = i + initRow;
 			String shortNameCell = ValidatorConstants.COLUMN_C + currentRow;
@@ -244,7 +287,6 @@ public class OdsValidator {
 
 			if (!cellIsEmpty(sheet, shortNameCell) || !cellIsEmpty(sheet, typeCell) || !cellIsEmpty(sheet, urlCell)
 					|| !cellIsEmpty(sheet, breadcumbCell)) {
-
 				// If detect any cell filled, count
 				numPages++;
 
@@ -252,8 +294,16 @@ public class OdsValidator {
 
 		}
 
-		// After count
+		if (maxNumPages == 30) {
+			String cellReference = "D40";
+			numPages = Integer.parseInt(getCellValue(sheet, cellReference));
 
+		} else if (maxNumPages == 35) {
+			String cellReference = "D45";
+			numPages = Integer.parseInt(getCellValue(sheet, cellReference));
+		}
+
+		// After count
 		initRow = 8;
 		for (int i = 0; i < numPages; i++) {
 
@@ -365,7 +415,7 @@ public class OdsValidator {
 
 			int countFilled = 0;
 
-			for (int i = 0; i < ValidatorConstants.MAX_PAGES; i++) {
+			for (int i = 0; i < maxNumPages; i++) {
 
 				int currentRow = tableRowIndex + i;
 				String pageTitleCell = ValidatorConstants.COLUMN_B + currentRow;
@@ -397,61 +447,72 @@ public class OdsValidator {
 
 			}
 
-			// Check for all numPages the columns B,C and D are valid
-			for (int i = 0; i < numPages; i++) {
+			// Check for all maxNumPages the columns B,C and D are valid
+			for (int i = 0; i < maxNumPages; i++) {
 
 				int currentRow = tableRowIndex + i;
 				String pageTitleCell = ValidatorConstants.COLUMN_B + currentRow;
 				String pageUrlCell = ValidatorConstants.COLUMN_C + currentRow;
 				String pageResultCell = ValidatorConstants.COLUMN_D + currentRow;
+				String pageResultErrorCell = ValidatorConstants.COLUMN_E + currentRow;
 
 				// Check B column if filled
 
-				if (cellIsEmpty(sheet, pageTitleCell)) {
-					errors.add(new ValidationError(sheet.getName(), pageTitleCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_SHORTNAME,
-									new String[] { pageTitleCell }, LocaleContextHolder.getLocale())));
+				if ("ERR".equals(getCellValue(sheet, pageResultErrorCell))) {
 
-				}
+					if (cellIsEmpty(sheet, pageTitleCell)) {
+						errors.add(new ValidationError(sheet.getName(), pageTitleCell,
+								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_SHORTNAME,
+										new String[] { pageTitleCell }, LocaleContextHolder.getLocale())));
 
-				// Check C column is a valid URL
-
-				if (cellIsEmpty(sheet, pageUrlCell)) {
-					errors.add(new ValidationError(sheet.getName(), pageUrlCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_URL,
-									new String[] { pageUrlCell }, LocaleContextHolder.getLocale())));
-				} else {
-					try {
-						new URL(getCellValue(sheet, pageUrlCell));
-					} catch (MalformedURLException e) {
-						errors.add(new ValidationError(sheet.getName(), pageUrlCell,
-								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_URL,
-										new String[] { pageUrlCell }, LocaleContextHolder.getLocale())));
 					}
 
-				}
+					// Check C column is a valid URL
 
-				// Check D column if filled
+					if (cellIsEmpty(sheet, pageUrlCell)) {
+						errors.add(new ValidationError(sheet.getName(), pageUrlCell,
+								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_URL,
+										new String[] { pageUrlCell }, LocaleContextHolder.getLocale())));
+					} else {
+						try {
+							new URL(getCellValue(sheet, pageUrlCell));
+						} catch (MalformedURLException e) {
+							errors.add(new ValidationError(sheet.getName(), pageUrlCell,
+									messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_URL,
+											new String[] { pageUrlCell }, LocaleContextHolder.getLocale())));
+						}
 
-				if (cellIsEmpty(sheet, pageResultCell)) {
-					errors.add(new ValidationError(sheet.getName(), pageResultCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_RESULT,
-									new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
-				} else if (!Arrays.asList(ValidatorConstants.ALLOWED_RESULT_TYPES)
-						.contains(getCellValue(sheet, pageResultCell))) {
-					errors.add(new ValidationError(sheet.getName(), pageResultCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_RESULT,
-									new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
-				} else if (Arrays.asList(ValidatorConstants.NOT_ALLOWED_RESULT_TYPES)
-						.contains(getCellValue(sheet, pageResultCell))) {
-					// Cannot exists N/T or N/D values
-					errors.add(new ValidationError(sheet.getName(), pageResultCell,
-							messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_NOTPERMITED_RESULT,
-									new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
+					}
+
+					// Check D column if filled
+
+					if (cellIsEmpty(sheet, pageResultCell)) {
+						errors.add(new ValidationError(sheet.getName(), pageResultCell,
+								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_EMPTY_RESULT,
+										new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
+					} else if (!Arrays.asList(ValidatorConstants.ALLOWED_RESULT_TYPES)
+							.contains(getCellValue(sheet, pageResultCell))) {
+						errors.add(new ValidationError(sheet.getName(), pageResultCell,
+								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_INVALID_RESULT,
+										new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
+					} else if (Arrays.asList(ValidatorConstants.NOT_ALLOWED_RESULT_TYPES)
+							.contains(getCellValue(sheet, pageResultCell))) {
+						// Cannot exists N/T or N/D values
+						errors.add(new ValidationError(sheet.getName(), pageResultCell,
+								messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_NOTPERMITED_RESULT,
+										new String[] { pageResultCell }, LocaleContextHolder.getLocale())));
+					}
 				}
 
 			}
-			tableRowIndex = tableRowIndex + 38;
+			tableRowIndex = tableRowIndex + principleTableSeparation;
+
+			// in old filles in sheet 01 , separation between tables is one row more
+			if (principleTableSeparation == ValidatorConstants.PRINCIPLE_TABLE_SEPARATION_IRAP_33_PAGES
+					&& ValidatorConstants.SHEET_P1_PERCEPTIBLE_NAME.equalsIgnoreCase(sheet.getName())
+					&& tableRowIndex == 646) {
+				tableRowIndex++;
+			}
 		}
 
 		return errors;
@@ -469,9 +530,13 @@ public class OdsValidator {
 		// B-C-19 --> 53 filled
 
 		int tableRowIndex = 19;
+		if (maxNumPages == 30) {
+			tableRowIndex = 20;
+		}
+
 		int countFilled = 0;
 
-		for (int i = 0; i < ValidatorConstants.MAX_PAGES; i++) {
+		for (int i = 0; i < maxNumPages; i++) {
 
 			int currentRow = tableRowIndex + i;
 			String pageTitleCell = ValidatorConstants.COLUMN_B + currentRow;
@@ -504,9 +569,12 @@ public class OdsValidator {
 		// B-C-60 --> 94 filled
 
 		tableRowIndex = 60;
+		if (maxNumPages == 30) {
+			tableRowIndex = 56;
+		}
 		countFilled = 0;
 
-		for (int i = 0; i < ValidatorConstants.MAX_PAGES; i++) {
+		for (int i = 0; i < maxNumPages; i++) {
 
 			int currentRow = tableRowIndex + i;
 			String pageTitleCell = ValidatorConstants.COLUMN_B + currentRow;
@@ -539,6 +607,10 @@ public class OdsValidator {
 		// D54 --> AG54 not in finished (30 columns)
 		int initColumnNumber = 3;
 		int rowNumber = 53; // 0 based
+
+		if (maxNumPages == 30) {
+			rowNumber = 50;
+		}
 		int principleRowNumber = 17; // 0 based
 
 		for (int i = 0; i < 30; i++) {
@@ -559,6 +631,9 @@ public class OdsValidator {
 
 		rowNumber = 94; // 0 based
 		principleRowNumber = 58; // 0 based
+		if (maxNumPages == 30) {
+			rowNumber = 86;
+		}
 
 		for (int i = 0; i < 20; i++) {
 			int columnNumber = initColumnNumber + i;
@@ -580,7 +655,7 @@ public class OdsValidator {
 		principleRowNumber = 17; // 0 based
 
 		for (int i = 0; i < 30; i++) {
-			for (int j = 0; i < ValidatorConstants.MAX_PAGES; i++) {
+			for (int j = 0; i < maxNumPages; i++) {
 				int columnNumber = initColumnNumber + i;
 				int currentRowNumber = rowNumber + j;
 				CellReference cr = new CellReference(currentRowNumber, columnNumber);
@@ -603,7 +678,7 @@ public class OdsValidator {
 		principleRowNumber = 58; // 0 based
 
 		for (int i = 0; i < 20; i++) {
-			for (int j = 0; i < ValidatorConstants.MAX_PAGES; i++) {
+			for (int j = 0; i < maxNumPages; i++) {
 				int columnNumber = initColumnNumber + i;
 				int currentRowNumber = rowNumber + j;
 				CellReference cr = new CellReference(currentRowNumber, columnNumber);
