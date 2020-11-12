@@ -33,9 +33,8 @@ import es.oaw.irapvalidator.Constants;
 import es.oaw.irapvalidator.model.ResponseValidatedFile;
 import es.oaw.irapvalidator.model.ValidatedFile;
 import es.oaw.irapvalidator.storage.FileDbStorageService;
-import es.oaw.irapvalidator.validator.OdsValidator;
 import es.oaw.irapvalidator.validator.ValidationError;
-import es.oaw.irapvalidator.validator.XlsxValidator;
+import es.oaw.irapvalidator.validator.WorkbookValidator;
 
 /**
  * The Class FileUploadController.
@@ -49,13 +48,9 @@ public class FileUploadController {
 	@Autowired
 	private FileDbStorageService storageService;
 
-	/** The ods validator. */
+	/** The unified validator. */
 	@Autowired
-	private OdsValidator odsValidator;
-
-	/** The xlsx validator. */
-	@Autowired
-	private XlsxValidator xlsxValidator;
+	private WorkbookValidator unifiedValidator;
 
 	/** The tmp path. */
 	String TMP_PATH = "/tmp/targetFile.tmp";
@@ -134,7 +129,7 @@ public class FileUploadController {
 						OutputStream outStream = new FileOutputStream(targetFile);
 						outStream.write(buffer);
 						final SpreadSheet spreadSheet = SpreadSheet.createFromFile(targetFile);
-						errors = odsValidator.validate(spreadSheet);
+						errors = unifiedValidator.validate(spreadSheet);
 						targetFile.delete();
 						outStream.close();
 					} catch (Exception e) {
@@ -143,7 +138,7 @@ public class FileUploadController {
 					break;
 				case "xlsx":
 					XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-					errors = xlsxValidator.validate(workbook);
+					errors = unifiedValidator.validate(workbook);
 					break;
 				}
 
