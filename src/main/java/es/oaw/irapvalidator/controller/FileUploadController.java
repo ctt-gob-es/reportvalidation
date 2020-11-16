@@ -1,14 +1,11 @@
 package es.oaw.irapvalidator.controller;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -35,6 +32,11 @@ import es.oaw.irapvalidator.storage.FileDbStorageService;
 import es.oaw.irapvalidator.validator.OdsValidator;
 import es.oaw.irapvalidator.validator.ValidationError;
 import es.oaw.irapvalidator.validator.XlsxValidator;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static es.oaw.irapvalidator.pdfutils.PdfReportGenerator.generateValidationResultPDF;
 
 /**
  * The Class FileUploadController.
@@ -98,6 +100,29 @@ public class FileUploadController {
 				.body(file.getData());
 	}
 
+	@GetMapping("/pdf/{filename:.+}")
+	@ResponseBody
+	public void servePdfFile( HttpServletRequest request,
+												HttpServletResponse response,
+												@PathVariable String filename) {
+		Path root = Paths.get(Constants.PDF_FOLDER);
+		Path filepath = root.resolve(filename+".pdf");
+
+		if (Files.exists(filepath))
+		{
+			response.setContentType("application/pdf");
+			response.addHeader("Content-Disposition", "attachment; filename="+filename+".pdf");
+			try
+			{
+				Files.copy(filepath, response.getOutputStream());
+				response.getOutputStream().flush();
+			}
+			catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+
 	/**
 	 * Handle file upload.
 	 *
@@ -153,7 +178,6 @@ public class FileUploadController {
 							hasErrors = true;
 							break;
 						}
-
 					}
 
 					if (hasErrors) {
@@ -170,15 +194,14 @@ public class FileUploadController {
 			}
 		}
 
+		String fileResource = generateValidationResultPDF(invalidFiles);
+		model.addAttribute("pdfId", fileResource);
 		model.addAttribute("valid", validFiles);
 		model.addAttribute("invalid", invalidFiles);
 		model.addAttribute("content", "../fragments/files/" + Constants.FRAGMENT_UPLOAD_SUMMARY);
 		return Constants.TEMPLATE_LOGGED_IN;
 	}
 
-	/**
-	 * * Temporary until proper validation is implemented.
-	 */
 	public static class ErrorInfo {
 
 		/** The filename. */
