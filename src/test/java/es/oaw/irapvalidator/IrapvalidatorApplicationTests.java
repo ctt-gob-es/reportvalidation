@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import es.oaw.irapvalidator.validator.OdsValidator;
 import es.oaw.irapvalidator.validator.ValidationError;
-import es.oaw.irapvalidator.validator.XlsxValidator;
+import es.oaw.irapvalidator.validator.WorkbookValidator;
+
 
 /**
  * The Class IrapvalidatorApplicationTests.
@@ -23,11 +23,7 @@ class IrapvalidatorApplicationTests {
 
 	/** The xlsx validator. */
 	@Autowired
-	private XlsxValidator xlsxValidator;
-
-	/** The ods validator. */
-	@Autowired
-	private OdsValidator odsValidator;
+	private WorkbookValidator unifiedValidator;
 
 	/**
 	 * Test XLSX.
@@ -41,7 +37,7 @@ class IrapvalidatorApplicationTests {
 				"/home/alvaro/Development/Projects/irapvalidator/src/test/resources/Informe_Revision_Profunidad_v1.xlsx");
 		FileInputStream inputStream = new FileInputStream(inputFile);
 		XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
-		Map<String,List<ValidationError>> errors = xlsxValidator.validate(workbook);
+		Map<String,List<ValidationError>> errors = unifiedValidator.validate(workbook);
 //		if (!CollectionUtils.isEmpty(errors)) {
 //			for (ValidationError error : errors) {
 //				System.out.println(error.toString());
@@ -62,7 +58,7 @@ class IrapvalidatorApplicationTests {
 		File inputFile = new File(
 				"/home/alvaro/Development/Projects/irapvalidator/src/test/resources/Informe_Revision_Profunidad_v1.ods");
 		final SpreadSheet workbook = SpreadSheet.createFromFile(inputFile);
-		Map<String,List<ValidationError>> errors = odsValidator.validate(workbook);
+		Map<String,List<ValidationError>> errors = unifiedValidator.validate(workbook);
 //		if (!CollectionUtils.isEmpty(errors)) {
 //			for (ValidationError error : errors) {
 //				System.out.println(error.toString());
