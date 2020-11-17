@@ -81,4 +81,4 @@ Thumbs.db
 *.mov
 *.wmv
 
-docker/mysql/volumes/
+docker/mysql/volumes/mysql/
