@@ -13,6 +13,7 @@ import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,9 +30,8 @@ import es.oaw.irapvalidator.Constants;
 import es.oaw.irapvalidator.model.ResponseValidatedFile;
 import es.oaw.irapvalidator.model.ValidatedFile;
 import es.oaw.irapvalidator.storage.FileDbStorageService;
-import es.oaw.irapvalidator.validator.OdsValidator;
 import es.oaw.irapvalidator.validator.ValidationError;
-import es.oaw.irapvalidator.validator.XlsxValidator;
+import es.oaw.irapvalidator.validator.WorkbookValidator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,19 +43,16 @@ import static es.oaw.irapvalidator.pdfutils.PdfReportGenerator.generateValidatio
  */
 @Controller
 @RequestMapping(path = Constants.UPLOAD_CONTROLLER_PATH)
+@PostAuthorize("hasPermission(returnObject, 'read')")
 public class FileUploadController {
 
 	/** The storage service. */
 	@Autowired
 	private FileDbStorageService storageService;
 
-	/** The ods validator. */
+	/** The unified validator. */
 	@Autowired
-	private OdsValidator odsValidator;
-
-	/** The xlsx validator. */
-	@Autowired
-	private XlsxValidator xlsxValidator;
+	private WorkbookValidator unifiedValidator;
 
 	/** The tmp path. */
 	String TMP_PATH = "/tmp/targetFile.tmp";
@@ -157,7 +154,7 @@ public class FileUploadController {
 						OutputStream outStream = new FileOutputStream(targetFile);
 						outStream.write(buffer);
 						final SpreadSheet spreadSheet = SpreadSheet.createFromFile(targetFile);
-						errors = odsValidator.validate(spreadSheet);
+						errors = unifiedValidator.validate(spreadSheet);
 						targetFile.delete();
 						outStream.close();
 					} catch (Exception e) {
@@ -166,7 +163,7 @@ public class FileUploadController {
 					break;
 				case "xlsx":
 					XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-					errors = xlsxValidator.validate(workbook);
+					errors = unifiedValidator.validate(workbook);
 					break;
 				}
 

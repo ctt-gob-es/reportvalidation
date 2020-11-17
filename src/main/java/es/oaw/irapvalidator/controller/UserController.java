@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 import javax.validation.Valid;
 
+import org.apache.poi.sl.usermodel.ObjectMetaData.Application;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -24,10 +25,13 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.oaw.irapvalidator.Constants;
+import es.oaw.irapvalidator.IrapvalidatorApplication;
 import es.oaw.irapvalidator.datatable.DatatablePage;
 import es.oaw.irapvalidator.datatable.DatatablePagination;
 import es.oaw.irapvalidator.dto.UserDTO;
+import es.oaw.irapvalidator.model.Configuration;
 import es.oaw.irapvalidator.model.User;
+import es.oaw.irapvalidator.repository.ConfigurationRepository;
 import es.oaw.irapvalidator.repository.RoleRepository;
 import es.oaw.irapvalidator.repository.UserRepository;
 import es.oaw.irapvalidator.service.UserService;
@@ -50,7 +54,7 @@ public class UserController {
 	private static final String ERROR_MESSAGE = "error";
 
 	/** The Constant REDIRECT_RECURSOS. */
-	private static final String REDIRECT_UserS = "redirect:/users";
+	private static final String REDIRECT_USERS = "redirect:/users";
 
 	/** The user service. */
 	@Autowired
@@ -63,6 +67,10 @@ public class UserController {
 	/** The role rpository. */
 	@Autowired
 	private RoleRepository roleRpository;
+
+	/** The configuration repository. */
+	@Autowired
+	private ConfigurationRepository configurationRepository;
 
 	/**
 	 * Titular concesion.
@@ -84,6 +92,8 @@ public class UserController {
 	 */
 	@GetMapping
 	public String list(Model model) {
+
+		model.addAttribute("accessConfiguration", configurationRepository.findByKey("anonymous.access").get());
 		model.addAttribute(Constants.MODEL_KEY_CONTENT, "../fragments/users/list");
 		return Constants.TEMPLATE_LOGGED_IN;
 	}
@@ -140,46 +150,44 @@ public class UserController {
 		redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE,
 				messageSource.getMessage("messages.success.save.user", null, LocaleContextHolder.getLocale()));
 
-		return REDIRECT_UserS;
+		return REDIRECT_USERS;
 	}
 
 	/**
 	 * Delete recurso.
 	 *
-	 * @param id            the id User
+	 * @param id                 the id User
 	 * @param model              the model
 	 * @param redirectAttributes the redirect attributes
 	 * @return the string
 	 */
 	@GetMapping("/delete/{id}")
-	public String remove(@PathVariable("id") int id, Model model,
-			final RedirectAttributes redirectAttributes) {
+	public String remove(@PathVariable("id") int id, Model model, final RedirectAttributes redirectAttributes) {
 		try {
 			User User = userRepository.findById(id).get();
 			userRepository.delete(User);
 		} catch (IllegalArgumentException | NoSuchElementException e) {
 			redirectAttributes.addFlashAttribute(ERROR_MESSAGE,
 					messageSource.getMessage("messages.success.save.user", null, LocaleContextHolder.getLocale()));
-			return REDIRECT_UserS;
+			return REDIRECT_USERS;
 		}
 
 		redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE,
 				messageSource.getMessage("messages.success.delete.user", null, LocaleContextHolder.getLocale()));
 
-		return REDIRECT_UserS;
+		return REDIRECT_USERS;
 	}
 
 	/**
 	 * Delete recurso.
 	 *
-	 * @param id            the id User
+	 * @param id                 the id User
 	 * @param model              the model
 	 * @param redirectAttributes the redirect attributes
 	 * @return the string
 	 */
 	@GetMapping("/deactivate/{id}")
-	public String deactivate(@PathVariable("id") int id, Model model,
-			final RedirectAttributes redirectAttributes) {
+	public String deactivate(@PathVariable("id") int id, Model model, final RedirectAttributes redirectAttributes) {
 		try {
 			User User = userRepository.findById(id).get();
 			User.setActive(0);
@@ -187,26 +195,25 @@ public class UserController {
 		} catch (IllegalArgumentException | NoSuchElementException e) {
 			redirectAttributes.addFlashAttribute(ERROR_MESSAGE,
 					messageSource.getMessage("messages.error.deactivate.user", null, LocaleContextHolder.getLocale()));
-			return REDIRECT_UserS;
+			return REDIRECT_USERS;
 		}
 
 		redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE,
 				messageSource.getMessage("messages.success.deactivate.user", null, LocaleContextHolder.getLocale()));
 
-		return REDIRECT_UserS;
+		return REDIRECT_USERS;
 	}
 
 	/**
 	 * Sactivar user.
 	 *
-	 * @param id            the id user
+	 * @param id                 the id user
 	 * @param model              the model
 	 * @param redirectAttributes the redirect attributes
 	 * @return the string
 	 */
 	@GetMapping("/activate/{id}")
-	public String activate(@PathVariable("id") int id, Model model,
-			final RedirectAttributes redirectAttributes) {
+	public String activate(@PathVariable("id") int id, Model model, final RedirectAttributes redirectAttributes) {
 		try {
 			User User = userRepository.findById(id).get();
 			User.setActive(1);
@@ -214,13 +221,13 @@ public class UserController {
 		} catch (IllegalArgumentException | NoSuchElementException e) {
 			redirectAttributes.addFlashAttribute(ERROR_MESSAGE,
 					messageSource.getMessage("messages.error.activate.user", null, LocaleContextHolder.getLocale()));
-			return REDIRECT_UserS;
+			return REDIRECT_USERS;
 		}
 
 		redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE,
 				messageSource.getMessage("messages.success.activate.user", null, LocaleContextHolder.getLocale()));
 
-		return REDIRECT_UserS;
+		return REDIRECT_USERS;
 	}
 
 	/**
@@ -248,7 +255,7 @@ public class UserController {
 			model.addAttribute("User", new User());
 			redirectAttributes.addFlashAttribute(ERROR_MESSAGE,
 					messageSource.getMessage("messages.error.detail.User", null, LocaleContextHolder.getLocale()));
-			return REDIRECT_UserS;
+			return REDIRECT_USERS;
 		}
 
 		model.addAttribute(Constants.MODEL_KEY_CONTENT, "../fragments/users/edit");
@@ -290,7 +297,7 @@ public class UserController {
 		userRepository.save(UserVO);
 		redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE,
 				messageSource.getMessage("messages.success.save.user", null, LocaleContextHolder.getLocale()));
-		return REDIRECT_UserS;
+		return REDIRECT_USERS;
 	}
 
 	/**
@@ -313,6 +320,31 @@ public class UserController {
 
 		}
 		return modelAndView;
+	}
+
+	/**
+	 * Configuration.
+	 *
+	 * @param configuration      the configuration
+	 * @param result             the result
+	 * @param model              the model
+	 * @param redirectAttributes the redirect attributes
+	 * @return the string
+	 * @throws InterruptedException the interrupted exception
+	 */
+	@PostMapping("/configuration")
+	public String configuration(@Valid @ModelAttribute("Configuration") Configuration configuration,
+			BindingResult result, Model model, final RedirectAttributes redirectAttributes)
+			throws InterruptedException {
+
+		configurationRepository.save(configuration);
+
+		//IrapvalidatorApplication.restart();
+
+		redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE,
+				messageSource.getMessage("messages.success.save.user.config", null, LocaleContextHolder.getLocale()));
+
+		return REDIRECT_USERS;
 	}
 
 }

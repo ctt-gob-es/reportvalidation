@@ -4,7 +4,7 @@ package es.oaw.irapvalidator.validator;
  * The Class ValidatorConstants.
  */
 public final class ValidatorConstants {
-	
+
 	/** The Constant STRING_EMPTY. */
 	public static final String STRING_EMPTY = "";
 
@@ -74,6 +74,9 @@ public final class ValidatorConstants {
 	/** The Constant VALIDATION_CELL_INVALID_DIR3. */
 	public static final String VALIDATION_CELL_INVALID_DIR3 = "validation.cell.invalid.dir3";
 
+	/** The Constant VALIDATION_CELL_SAMPLE_CORRECT. */
+	public static final String VALIDATION_CELL_SAMPLE_CORRECT = "validation.cell.sample.correct";
+
 	/** The Constant RESULT_PASS. */
 	public static final String RESULT_PASS = "Pasa";
 
@@ -91,6 +94,9 @@ public final class ValidatorConstants {
 
 	/** The Constant IN_REVIEW_VALUE. */
 	public static final String IN_REVIEW_VALUE = "En curso";
+
+	/** The Constant VALID_SAMPLE_LABEL. */
+	public static final String VALID_SAMPLE_LABEL = "¿MUESTRA CORRECTA?";
 
 	/** The Constant COLUMN_I. */
 	public static final String COLUMN_I = "I";
@@ -115,14 +121,18 @@ public final class ValidatorConstants {
 
 	/** The Constant YES_VALUE. */
 	public static final String YES_VALUE = "Sí";
+	
+	/** The Constant NO_VALUE. */
+	public static final String NO_VALUE = "no";
 
 	/** The Constant VALIDATION_CELL_EMPTY. */
 	public static final String VALIDATION_CELL_EMPTY = "validation.cell.empty";
 
 	/** The Constant ALLOWED_PAGE_TYPES. */
 	public static final String[] ALLOWED_PAGE_TYPES = new String[] { "Página inicio", "Inicio de sesión", "Mapa web",
-			"Contacto", "Ayuda", "Legal", "Servicio / Proceso", "Búsqueda", "Declaración accesibilidad",
-			"Mecanismo de comunicación", "Pagina tipo", "Otras páginas", "Documento descargable", "Aleatoria" };
+			"Contacto", "Ayuda", "Legal", "Servicio / Proceso", "Servicio", "Proceso", "Búsqueda",
+			"Declaración accesibilidad", "Mecanismo de comunicación", "Pagina tipo", "Otras páginas",
+			"Documento descargable", "Aleatoria" };
 
 	/** The Constant ALLOWED_RESULT_TYPES. */
 	public static final String[] ALLOWED_RESULT_TYPES = new String[] { RESULT_NOT_TESTED, RESULT_CANNOT_TELL,
@@ -131,8 +141,17 @@ public final class ValidatorConstants {
 	/** The Constant NOT_ALLOWED_RESULT_TYPES. */
 	public static final String[] NOT_ALLOWED_RESULT_TYPES = new String[] { RESULT_NOT_TESTED, RESULT_CANNOT_TELL, };
 
-	
 	/** The Constant SHEET_01_MANDATORY_CONTENT_ROWS. */
-	public static final int[] SHEET_01_MANDATORY_CONTENT_ROWS = new int[] { 7, 9, 11, 13, 17, 19, 21, 25, 27, 29, 31, 33, 35, 39, 41, 45 };
+	public static final int[] SHEET_01_MANDATORY_CONTENT_ROWS = new int[] { 7, 9, 11, 13, 17, 19, 21, 25, 27, 29, 31,
+			33, 35, 39, 41, 45 };
+
+	/** The Constant PRINCIPLE_TABLE_SEPARATION_IRAP_35_PAGES. */
+	public static final int PRINCIPLE_TABLE_SEPARATION_IRAP_35_PAGES = 38;
+
+	/** The Constant PRINCIPLE_TABLE_SEPARATION_IRAP_33_PAGES. */
+	public static final int PRINCIPLE_TABLE_SEPARATION_IRAP_33_PAGES = 33;
+
+	/** The Constant SHEET_P1_PERCEPTIBLE_NAME. */
+	public static final String SHEET_P1_PERCEPTIBLE_NAME = "P1.Perceptible";
 
 }
