@@ -35,6 +35,7 @@ import es.oaw.irapvalidator.validator.WorkbookValidator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import static es.oaw.irapvalidator.pdfutils.PdfReportGenerator.generateValidationResultPDF;
 
@@ -97,22 +98,24 @@ public class FileUploadController {
 				.body(file.getData());
 	}
 
-	@GetMapping("/pdf/{filename:.+}")
+	@GetMapping("/pdf/")
 	@ResponseBody
-	public void servePdfFile( HttpServletRequest request,
-												HttpServletResponse response,
-												@PathVariable String filename) {
-		Path root = Paths.get(Constants.PDF_FOLDER);
-		Path filepath = root.resolve(filename+".pdf");
+	public void servePdfFile( HttpServletRequest request, HttpSession session,
+												HttpServletResponse response) {
 
-		if (Files.exists(filepath))
+		List<String> validFiles = (List<String>) session.getAttribute("valid");
+		List<ErrorInfo> invalidFiles = (List<ErrorInfo>) session.getAttribute("invalid");
+		Path fileResource = generateValidationResultPDF(validFiles, invalidFiles);
+
+		if (Files.exists(fileResource))
 		{
 			response.setContentType("application/pdf");
-			response.addHeader("Content-Disposition", "attachment; filename="+filename+".pdf");
+			response.addHeader("Content-Disposition", "attachment; filename="+fileResource.getFileName());
 			try
 			{
-				Files.copy(filepath, response.getOutputStream());
+				Files.copy(fileResource, response.getOutputStream());
 				response.getOutputStream().flush();
+				Files.delete(fileResource);
 			}
 			catch (IOException ex) {
 				ex.printStackTrace();
@@ -129,12 +132,13 @@ public class FileUploadController {
 	 * @return the string
 	 */
 	@PostMapping("/")
-	public String handleFileUpload(MultipartHttpServletRequest request, RedirectAttributes redirectAttributes,
-			Model model) {
+	public String handleFileUpload(MultipartHttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes,
+								   Model model) {
 
 		Map<String, MultipartFile> fileMap = request.getFileMap();
 		List<String> validFiles = new ArrayList<>();
 		List<ErrorInfo> invalidFiles = new ArrayList<>();
+
 
 		for (MultipartFile file : fileMap.values()) {
 			try {
@@ -191,10 +195,8 @@ public class FileUploadController {
 			}
 		}
 
-		String fileResource = generateValidationResultPDF(invalidFiles);
-		model.addAttribute("pdfId", fileResource);
-		model.addAttribute("valid", validFiles);
-		model.addAttribute("invalid", invalidFiles);
+		session.setAttribute("valid", validFiles);
+		session.setAttribute("invalid", invalidFiles);
 		model.addAttribute("content", "../fragments/files/" + Constants.FRAGMENT_UPLOAD_SUMMARY);
 		return Constants.TEMPLATE_LOGGED_IN;
 	}

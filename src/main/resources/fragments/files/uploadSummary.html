@@ -21,10 +21,10 @@
 			<div class="card-header" th:text="#{file.valid.files}"></div>
 			<div class="card-body">
 				<div class="container-fluid">
-					<div th:if="${valid.empty}" class="p-3 mb-2 bg-white text-dark">
+					<div th:if="${session.valid.empty}" class="p-3 mb-2 bg-white text-dark">
 						<span th:text="#{file.none}"></span>
 					</div>
-					<div th:each="filename : ${valid}"
+					<div th:each="filename : ${session.valid}"
 						class="p-3 mb-2 bg-success text-white">
 						<span th:text="${filename}"> </span>
 					</div>
@@ -37,11 +37,11 @@
 				<div class="container-fluid">
 
 
-					<div class="row-fluid" th:if="${invalid.empty}">
+					<div class="row-fluid" th:if="${session.invalid.empty}">
 						<span th:text="#{file.name}"></span>
 					</div>
 
-					<div class="row-fluid" th:each="errorInfo,iter : ${invalid}">
+					<div class="row-fluid" th:each="errorInfo,iter : ${session.invalid}">
 						<div class="row p-3 bg-danger text-white font-weight-bold">
 							<div class="col-10">
 								<span th:text="${errorInfo.filename}"></span>
@@ -84,7 +84,7 @@
 				</div>
 			</div>
 		</div>
-		<a th:href="@{'/files/pdf/' + ${pdfId}}" th:text="#{button.download.results}" class="btn btn-primary"></a>
+		<a th:href="@{/files/pdf/}" th:text="#{button.download.results}" class="btn btn-primary"></a>
 		<a th:href="@{/}" th:text="#{button.back}" class="btn btn-primary"></a>
 	</div>
 

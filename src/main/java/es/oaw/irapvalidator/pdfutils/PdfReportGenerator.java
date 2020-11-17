@@ -21,38 +21,70 @@ public class PdfReportGenerator {
     private static final Font categoryFont = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
     private static final Font subcategoryFont = new Font(Font.FontFamily.TIMES_ROMAN, 16, Font.BOLD);
 
-    public static String generateValidationResultPDF(List<FileUploadController.ErrorInfo> files){
-        String fileUUID = UUID.randomUUID().toString();
+    public static Path generateValidationResultPDF(List <String> validFiles, List<FileUploadController.ErrorInfo> invalidFiles){
         Document document = new Document();
 
         Path root = Paths.get(Constants.PDF_FOLDER);
-        Path filepath = root.resolve(fileUUID+".pdf");
+        Path filepath = root.resolve("ResultadosValidacion.pdf");
         String path = filepath.toAbsolutePath().toString();
         try {
             PdfWriter.getInstance(document, new FileOutputStream(path));
             document.open();
             int chapter = 1;
 
-            for (FileUploadController.ErrorInfo file: files) {
+            //Ficheros válidos
+            Anchor anchor = new Anchor("Ficheros validados", categoryFont);
+            Chapter catPart = new Chapter(new Paragraph(anchor), chapter);
+
+            if (validFiles.size() != 0){
+                Paragraph paragraph = new Paragraph("Los siguientes ficheros han sido validados satisfactoriamente: ");
+                addEmptyLine(paragraph, 1);
+                // Creating a list
+                com.itextpdf.text.List list = new com.itextpdf.text.List(com.itextpdf.text.List.UNORDERED);
+                for (String file: validFiles){
+                    list.add(new ListItem(file));
+                }
+                catPart.add(paragraph);
+                catPart.add(list);
+            }
+            else{
+                Paragraph paragraph = new Paragraph("Níngún fichero validado satisfactoriamente.");
+                catPart.add(paragraph);
+            }
+            document.add(catPart);
+
+            // Ficheros no válidos
+            chapter = 2;
+            for (FileUploadController.ErrorInfo file: invalidFiles) {
                 // File category
-                Anchor anchor = new Anchor("Fichero: " + file.getFilename(), categoryFont);
+                anchor = new Anchor("Fichero: " + file.getFilename(), categoryFont);
                 anchor.setName(file.getFilename());
-                Chapter catPart = new Chapter(new Paragraph(anchor), chapter);
-                document.add(Chunk.NEWLINE);
+                catPart = new Chapter(new Paragraph(anchor), chapter);
 
                 for (Map.Entry<String, List<ValidationError>> entry : file.getErrors().entrySet()) {
                     // Sheet subcategory
                     Paragraph subPara = new Paragraph("Hoja: " + entry.getKey(), subcategoryFont);
                     Section subCatPart = catPart.addSection(subPara);
 
-                    Paragraph paragraph = new Paragraph();
-                    addEmptyLine(paragraph, 2);
-                    subCatPart.add(paragraph);
+                    Paragraph emptyLines = new Paragraph();
+                    addEmptyLine(emptyLines, 1);
+                    subCatPart.add(emptyLines);
 
                     // Error table
-                    PdfPTable errorTable = createTable(entry.getValue());
-                    subCatPart.add(errorTable);
-                    document.add(Chunk.NEWLINE);
+                    if (entry.getValue().size() != 0){
+                        PdfPTable errorTable = createTable(entry.getValue());
+                        subCatPart.add(errorTable);
+                    }
+                    else{
+                        Paragraph paragraph = new Paragraph("Hoja validada correctamente.");
+                        subCatPart.add(paragraph);
+                    }
+
+                    //separation between subsections
+                    Paragraph paragraph = new Paragraph();
+                    addEmptyLine(paragraph, 1);
+                    subCatPart.add(paragraph);
+
                 }
                 document.add(catPart);
                 chapter++;
@@ -64,7 +96,7 @@ public class PdfReportGenerator {
             e.printStackTrace();
         }
 
-        return fileUUID;
+        return filepath;
     }
 
     private static void addEmptyLine(Paragraph paragraph, int number) {
