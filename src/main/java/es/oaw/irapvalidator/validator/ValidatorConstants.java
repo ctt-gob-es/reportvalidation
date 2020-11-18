@@ -7,7 +7,10 @@ public final class ValidatorConstants {
 
 	/** The Constant STRING_EMPTY. */
 	public static final String STRING_EMPTY = "";
-
+	
+	/** The Constant STRING_SPACE. */
+	public static final String STRING_SPACE = " ";
+	
 	/** The Constant VALIDATION_RESULTS_NOTALLOWED. */
 	public static final String VALIDATION_RESULTS_NOTALLOWED = "validation.results.notallowed";
 
@@ -58,6 +61,9 @@ public final class ValidatorConstants {
 
 	/** The Constant VALIDATION_CELL_EMPTY_SHORTNAME. */
 	public static final String VALIDATION_CELL_EMPTY_SHORTNAME = "validation.cell.empty.shortname";
+	
+	public static final String VALIDATION_CELL_SAMPLE_DISMATCH = "validation.sample.pages.dismatch";
+	
 
 	/** The Constant VALIDATION_SHEET1_TECHS_ATLEASTONE. */
 	public static final String VALIDATION_SHEET1_TECHS_ATLEASTONE = "validation.sheet1.techs.atleastone";

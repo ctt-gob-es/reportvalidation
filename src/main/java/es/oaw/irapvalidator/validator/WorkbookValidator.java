@@ -351,14 +351,21 @@ public class WorkbookValidator {
 			}
 
 		}
-
+		int cellNumPages = 0;
+		String cellReference = "";
 		if (maxNumPages == 30) {
-			String cellReference = "D40";
-			numPages = Integer.parseInt(getCellValue(sheet, cellReference));
+			cellReference = "D40";
+			cellNumPages = Integer.parseInt(getCellValue(sheet, cellReference));
 
 		} else if (maxNumPages == 35) {
-			String cellReference = "D45";
-			numPages = Integer.parseInt(getCellValue(sheet, cellReference));
+			cellReference = "D45";
+			cellNumPages = Integer.parseInt(getCellValue(sheet, cellReference));
+		}
+
+		// takes as valid the value marked in file
+		if (cellNumPages != 0) {
+
+			numPages = cellNumPages;
 		}
 
 		// After count
@@ -442,6 +449,12 @@ public class WorkbookValidator {
 			} catch (NumberFormatException e) {
 
 			}
+		}
+
+		if (numPages != cellNumPages) {
+			errors.add(new ValidationError(sheetName, cellReference,
+					messageSource.getMessage(ValidatorConstants.VALIDATION_CELL_SAMPLE_DISMATCH,
+							new String[] { cellReference }, LocaleContextHolder.getLocale())));
 		}
 
 		return errors;
@@ -609,7 +622,7 @@ public class WorkbookValidator {
 
 		// Less or greater than filled
 
-		if (countFilled < numPages) {
+		if (countFilled!=0 && countFilled < numPages) {
 
 			String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 
@@ -647,7 +660,7 @@ public class WorkbookValidator {
 		}
 
 		// Less or greater than filled
-		if (countFilled < numPages) {
+		if (countFilled!=0 && countFilled < numPages) {
 
 			String principleTitleCell = ValidatorConstants.COLUMN_C + (tableRowIndex - 1);
 

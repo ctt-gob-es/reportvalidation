@@ -1,12 +1,21 @@
 package es.oaw.irapvalidator.controller;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
@@ -29,15 +38,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import es.oaw.irapvalidator.Constants;
 import es.oaw.irapvalidator.model.ResponseValidatedFile;
 import es.oaw.irapvalidator.model.ValidatedFile;
+import es.oaw.irapvalidator.pdfutils.PdfReportGenerator;
 import es.oaw.irapvalidator.storage.FileDbStorageService;
 import es.oaw.irapvalidator.validator.ValidationError;
 import es.oaw.irapvalidator.validator.WorkbookValidator;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import static es.oaw.irapvalidator.pdfutils.PdfReportGenerator.generateValidationResultPDF;
 
 /**
  * The Class FileUploadController.
@@ -54,6 +58,10 @@ public class FileUploadController {
 	/** The unified validator. */
 	@Autowired
 	private WorkbookValidator unifiedValidator;
+
+	/** The pdf report generator. */
+	@Autowired
+	private PdfReportGenerator pdfReportGenerator;
 
 	/** The tmp path. */
 	String TMP_PATH = "/tmp/targetFile.tmp";
@@ -98,26 +106,29 @@ public class FileUploadController {
 				.body(file.getData());
 	}
 
+	/**
+	 * Serve pdf file.
+	 *
+	 * @param request the request
+	 * @param session the session
+	 * @param response the response
+	 */
 	@GetMapping("/pdf/")
 	@ResponseBody
-	public void servePdfFile( HttpServletRequest request, HttpSession session,
-												HttpServletResponse response) {
+	public void servePdfFile(HttpServletRequest request, HttpSession session, HttpServletResponse response) {
 
 		List<String> validFiles = (List<String>) session.getAttribute("valid");
 		List<ErrorInfo> invalidFiles = (List<ErrorInfo>) session.getAttribute("invalid");
-		Path fileResource = generateValidationResultPDF(validFiles, invalidFiles);
+		Path fileResource = pdfReportGenerator.generateValidationResultPDF(validFiles, invalidFiles);
 
-		if (Files.exists(fileResource))
-		{
+		if (Files.exists(fileResource)) {
 			response.setContentType("application/pdf");
-			response.addHeader("Content-Disposition", "attachment; filename="+fileResource.getFileName());
-			try
-			{
+			response.addHeader("Content-Disposition", "attachment; filename=" + fileResource.getFileName());
+			try {
 				Files.copy(fileResource, response.getOutputStream());
 				response.getOutputStream().flush();
 				Files.delete(fileResource);
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 		}
@@ -127,18 +138,18 @@ public class FileUploadController {
 	 * Handle file upload.
 	 *
 	 * @param request            the request
+	 * @param session the session
 	 * @param redirectAttributes the redirect attributes
 	 * @param model              the model
 	 * @return the string
 	 */
 	@PostMapping("/")
-	public String handleFileUpload(MultipartHttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes,
-								   Model model) {
+	public String handleFileUpload(MultipartHttpServletRequest request, HttpSession session,
+			RedirectAttributes redirectAttributes, Model model) {
 
 		Map<String, MultipartFile> fileMap = request.getFileMap();
 		List<String> validFiles = new ArrayList<>();
 		List<ErrorInfo> invalidFiles = new ArrayList<>();
-
 
 		for (MultipartFile file : fileMap.values()) {
 			try {
@@ -201,6 +212,9 @@ public class FileUploadController {
 		return Constants.TEMPLATE_LOGGED_IN;
 	}
 
+	/**
+	 * The Class ErrorInfo.
+	 */
 	public static class ErrorInfo {
 
 		/** The filename. */
