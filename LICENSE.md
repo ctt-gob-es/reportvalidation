@@ -1,3 +1,5 @@
+
+
 EUROPEAN UNION PUBLIC LICENCE v. 1.2
 
 EUPL © the European Union 2007, 2016
@@ -173,3 +175,4 @@ Appendix
 — The European Commission may update this Appendix to later versions of the above licences without producing a new version of the EUPL, as long as they provide the rights granted in Article 2 of this Licence and protect the covered Source Code from exclusive appropriation.
 
 — All other changes or additions to this Appendix require the production of a new EUPL version.
+
