@@ -20,13 +20,13 @@ This project uses a embeded Tomcat Server
 
 Clone the Maven project and compile
 
-mvn clean install -p <profile>
+> mvn clean install -p <profile>
 
 The profile is used to determinate what application configuration file (aplication-<profile>.properties file) is used.
 
 This generates a jar file with the aplication that can be executed like:
 
-java -jar irapvalidator.jar
+> java -jar irapvalidator.jar
 
 
 #### MySQL Database
